@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Hub | 資源展示庫 V3.0</title>
+    <title>AI Hub | 資源展示庫 V3.1</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -11,7 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     
     <style>
-        /* CSS V3.0 - Menu & Tag Fixes */
+        /* CSS V3.1 - Keyword Display Fix */
         :root {
             --primary: #2c3e50;
             --accent: #00d2ff;
@@ -77,18 +77,9 @@
         .app-name { font-size: 1.4rem; margin: 0; font-weight: bold; background: -webkit-linear-gradient(#00d2ff, #3a7bd5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .version-tag { font-size: 0.7rem; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 10px; margin-top: 5px; display: inline-block; color: #bdc3c7; }
 
-        /* Menu Item Logic Fixed */
         .menu-item { padding: 12px 15px; cursor: pointer; border-radius: 8px; margin-bottom: 5px; transition: 0.2s; display: flex; align-items: center; border: 1px solid transparent; }
         .menu-item:hover { background: rgba(255,255,255,0.1); transform: translateX(5px); }
-        
-        /* Active State style */
-        .menu-item.active { 
-            background: rgba(255,255,255,0.15); 
-            border-left: 4px solid var(--accent);
-            transform: translateX(5px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
+        .menu-item.active { background: rgba(255,255,255,0.15); border-left: 4px solid var(--accent); transform: translateX(5px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .menu-icon { margin-right: 10px; width: 20px; text-align: center; }
         .user-info { margin-top: auto; padding-top:20px; border-top:1px solid rgba(255,255,255,0.2); font-size: 0.9rem; }
         
@@ -136,8 +127,11 @@
         .comment-input { flex: 1; padding: 6px; font-size: 0.85rem; border: 1px solid #ddd; border-radius: 4px; }
 
         .tags-container { margin: 10px 0; display: flex; flex-wrap: wrap; gap: 5px; }
-        .tag { background: #f0f2f5; padding: 4px 10px; border-radius: 15px; font-size: 0.8rem; color: #555; display: inline-flex; align-items: center;}
+        .tag { padding: 4px 10px; border-radius: 15px; font-size: 0.75rem; display: inline-flex; align-items: center;}
+        
+        /* New Tag Styles */
         .smart-tag { background: #e8f6f3; color: var(--success); border: 1px solid #d4efdf; }
+        .keyword-tag { background: #f4f6f7; color: #5d6d7e; border: 1px solid #d5dbdb; }
         
         .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: 0.2s; font-weight: 600; }
         .btn-primary { background: linear-gradient(135deg, #3a7bd5, #00d2ff); color: white; }
@@ -188,7 +182,7 @@
 
     <div id="loginModal">
         <div class="login-box">
-            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V3.0</h2>
+            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V3.1</h2>
             <p style="color:#7f8c8d; margin-bottom:20px;">請使用校方派發的帳號登入</p>
             <input type="email" id="loginEmail" class="form-control" placeholder="Email" style="margin-bottom:10px;">
             <input type="password" id="loginPass" class="form-control" placeholder="Password" style="margin-bottom:20px;">
@@ -203,7 +197,7 @@
         <div class="sidebar-header">
             <div class="school-name">香海正覺蓮社<br>佛教正覺蓮社學校</div>
             <h2 class="app-name">BCK-AI Hub</h2>
-            <div class="version-tag">V3.0 Fix</div>
+            <div class="version-tag">V3.1 Fix</div>
         </div>
 
         <div id="menu-dashboard" class="menu-item active" onclick="showPage('dashboard')"><span class="menu-icon">📊</span> 數據總覽</div>
@@ -469,9 +463,13 @@
             {val: "Contribution", label: "貢獻 (Contribution)"}
         ];
         
-        // V3.0 FIX: Pre-populate map AND safe lookup logic
+        // V3.1: Pre-populate map
         const tagMap = {};
-        tag5C.forEach(t => tagMap[t.val] = t.label);
+        const tag5CValues = []; // Helper for quick check
+        tag5C.forEach(t => { 
+            tagMap[t.val] = t.label;
+            tag5CValues.push(t.val);
+        });
 
         const tagKeywords = ["AI 生成", "評估工具", "課堂管理", "備課輔助", "差異化教學", "學生自學", "專題研習", "遊戲化學習", "行政效率", "其他"];
 
@@ -567,16 +565,35 @@
             container.innerHTML = '';
             apps.forEach(app => {
                 try {
-                    // V3.0 FIX: Better tag rendering to prevent "Empty Text"
-                    const tagsHtml = (app.tags && Array.isArray(app.tags) && app.tags.length > 0) 
-                        ? `<div class="tags-container">${app.tags.map(t => {
-                            if (!t) return '';
-                            // Try map, if fails use original text. Ensure not empty.
-                            let label = tagMap[t] || t;
-                            if (!label || label.trim() === "") label = t; // Fallback
-                            return `<span class="tag smart-tag">🤖 ${label}</span>`;
-                        }).join('')}</div>`
-                        : '';
+                    // V3.1 FIX: Separation of 5C and Keywords
+                    let tagsHtml = '';
+                    if (app.tags && Array.isArray(app.tags) && app.tags.length > 0) {
+                        const fiveCTags = [];
+                        const kwTags = [];
+                        
+                        app.tags.forEach(t => {
+                            if (!t) return;
+                            // Check if it's a 5C value or label key
+                            if (tag5CValues.includes(t)) {
+                                fiveCTags.push(tagMap[t]);
+                            } else {
+                                // Assume it's a keyword
+                                kwTags.push(t);
+                            }
+                        });
+
+                        let innerHtml = '';
+                        // Render 5C Tags (Green, Robot/Star)
+                        fiveCTags.forEach(label => {
+                            innerHtml += `<span class="tag smart-tag">🌟 ${label}</span>`;
+                        });
+                        // Render Keyword Tags (Gray, Tag Icon)
+                        kwTags.forEach(label => {
+                            innerHtml += `<span class="tag keyword-tag">🏷️ ${label}</span>`;
+                        });
+                        
+                        tagsHtml = `<div class="tags-container">${innerHtml}</div>`;
+                    }
                     
                     let catBadge = '';
                     let cardClass = app.category;
@@ -794,21 +811,13 @@
             });
         }
 
-        // V3.0 FIX: Updated Menu Active Logic
         function showPage(pageId) { 
-            // 1. Hide all pages
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); 
-            
-            // 2. Show selected page
             document.getElementById(pageId).classList.add('active'); 
-
-            // 3. Update Menu Active State
             document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
             const activeMenuId = 'menu-' + pageId;
             const activeItem = document.getElementById(activeMenuId);
             if(activeItem) activeItem.classList.add('active');
-
-            // 4. Mobile sidebar toggle
             if(window.innerWidth<=768 && document.querySelector('.sidebar').classList.contains('active')) {
                 toggleSidebar();
             }
