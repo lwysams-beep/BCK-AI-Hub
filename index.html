@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BCK-AI Hub | 正覺蓮社 AI 智慧庫 V2.3</title>
+    <title>BCK-AI Hub | 正覺蓮社 AI 智慧庫 V2.4</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -11,7 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     
     <style>
-        /* CSS V2.3 Responsive Update */
+        /* CSS V2.4 */
         :root {
             --primary: #2c3e50;
             --accent: #3498db;
@@ -23,103 +23,48 @@
             --value-edu-color: #e91e63;
         }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f4f7f6; display: flex; height: 100vh; overflow-x: hidden; }
-        
-        /* Sidebar Styling */
-        .sidebar { 
-            width: 260px; 
-            background-color: var(--primary); 
-            color: white; 
-            display: flex; 
-            flex-direction: column; 
-            padding: 20px; 
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1); 
-            transition: transform 0.3s ease-in-out;
-            z-index: 1001;
-            flex-shrink: 0; /* Prevent shrinking */
-        }
-        
-        .main-content { 
-            flex: 1; 
-            padding: 30px; 
-            overflow-y: auto; 
-            position: relative; 
-            width: 100%; /* Ensure full width on mobile */
-        }
-
+        .sidebar { width: 260px; background-color: var(--primary); color: white; display: flex; flex-direction: column; padding: 20px; box-shadow: 2px 0 5px rgba(0,0,0,0.1); transition: transform 0.3s ease-in-out; z-index: 1001; flex-shrink: 0; }
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; position: relative; width: 100%; }
         .page { display: none; animation: fadeIn 0.4s; }
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        
         .sidebar h2 { font-size: 1.3rem; margin-bottom: 20px; text-align: center; border-bottom: 1px solid #546e7a; padding-bottom: 15px; }
         .menu-item { padding: 12px 15px; cursor: pointer; border-radius: 8px; margin-bottom: 5px; transition: 0.2s; display: flex; align-items: center; }
         .menu-item:hover, .menu-item.active { background-color: var(--accent); transform: translateX(5px); }
         .menu-icon { margin-right: 10px; width: 20px; text-align: center; }
         .user-info { margin-top: auto; padding-top:20px; border-top:1px solid #546e7a; font-size: 0.9rem; }
         
-        /* V2.3 Mobile Menu Elements */
+        /* Mobile Elements */
         .mobile-header { display: none; align-items: center; margin-bottom: 20px; }
-        .menu-toggle-btn { 
-            display: none; 
-            background: none; 
-            border: none; 
-            font-size: 1.5rem; 
-            cursor: pointer; 
-            color: var(--primary); 
-            padding: 0 10px 0 0;
-        }
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-        }
-
-        /* --- Media Queries for Mobile (V2.3) --- */
+        .menu-toggle-btn { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--primary); padding: 0 10px 0 0; }
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
         @media (max-width: 768px) {
             body { flex-direction: column; }
-            .sidebar {
-                position: fixed;
-                top: 0;
-                left: 0;
-                height: 100%;
-                transform: translateX(-100%); /* Hide by default */
-            }
-            .sidebar.active {
-                transform: translateX(0); /* Show when active */
-            }
-            .sidebar-overlay.active {
-                display: block;
-            }
+            .sidebar { position: fixed; top: 0; left: 0; height: 100%; transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
+            .sidebar-overlay.active { display: block; }
             .main-content { padding: 20px; }
             .menu-toggle-btn { display: block; }
             .mobile-header { display: flex; }
-            
-            /* Adjust chart sizing for mobile */
             .charts-row { grid-template-columns: 1fr; }
             .stats-grid { grid-template-columns: 1fr 1fr; } 
         }
 
-        /* --- Existing Styles --- */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
-        @media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; } .stat-card { padding: 15px; } .stat-number { font-size: 2rem; } }
-
         .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; border-bottom: 4px solid var(--accent); }
         .stat-number { font-size: 2.5rem; font-weight: 800; color: var(--primary); margin: 10px 0; }
-        
         .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
         .chart-box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; }
-
         .resource-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
         .card { background: white; border-radius: 12px; padding: 0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; transition: transform 0.2s; overflow: hidden; display: flex; flex-direction: column;}
         .card:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
         .card-content { padding: 20px; flex: 1; display: flex; flex-direction: column; }
         
+        /* Preview Styling V2.4 */
         .app-preview { width: 100%; height: 180px; object-fit: contain; background-color: #e0e0e0; border-bottom: 1px solid #ddd; display: block; }
-        .app-preview-placeholder { height: 180px; background: linear-gradient(135deg, #e0e0e0, #f5f5f5); display: flex; align-items: center; justify-content: center; color: #aaa; font-size: 2rem; }
+        .app-preview-placeholder { height: 180px; background: linear-gradient(135deg, #e0e0e0, #f5f5f5); display: flex; align-items: center; justify-content: center; color: #aaa; font-size: 2rem; flex-direction: column;}
+        .preview-icon { font-size: 3.5rem; margin-bottom: 10px; }
+        .preview-type { font-size: 0.9rem; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; }
 
         .card.teaching { border-top: 5px solid var(--accent); }
         .card.admin { border-top: 5px solid var(--admin-color); }
@@ -166,6 +111,9 @@
         .checkbox-label { display: flex; align-items: center; font-size: 0.9rem; cursor: pointer; }
         .checkbox-label input { margin-right: 8px; transform: scale(1.2); }
 
+        /* V2.4 Prompt Box Style */
+        .prompt-box { background: #f8f9fa; border-left: 3px solid #f39c12; padding: 10px; font-size: 0.85rem; color: #555; margin-bottom: 10px; white-space: pre-wrap; font-family: monospace; max-height: 80px; overflow-y: auto;}
+
         #loginModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.9); display: flex; justify-content: center; align-items: center; z-index: 1000; }
         .login-box { background: white; padding: 40px; border-radius: 15px; width: 320px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         
@@ -183,7 +131,7 @@
 
     <div id="loginModal">
         <div class="login-box">
-            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V2.3</h2>
+            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V2.4</h2>
             <p style="color:#7f8c8d; margin-bottom:20px;">請使用校方派發的帳號登入</p>
             <input type="email" id="loginEmail" class="form-control" placeholder="Email" style="margin-bottom:10px;">
             <input type="password" id="loginPass" class="form-control" placeholder="Password" style="margin-bottom:20px;">
@@ -287,8 +235,8 @@
                 <div class="form-group">
                     <label>資源類型</label>
                     <select id="uploadType" class="form-control" onchange="toggleUploadForm()">
-                        <option value="app">App / 網件</option>
-                        <option value="prompt">AI Prompt (指令)</option>
+                        <option value="app">上載作品 (App/檔案/教案)</option>
+                        <option value="prompt">純分享 AI Prompt (指令)</option>
                     </select>
                 </div>
 
@@ -324,12 +272,10 @@
                                 <option value="價值觀教育">價值觀教育</option>
                                 <option value="跨課程">跨課程 (請選此項以進行複選)</option>
                             </select>
-                            
                             <div id="crossSubjectSection" style="display:none; margin-top:10px;">
                                 <label style="font-size:0.9rem; color:#e67e22;">請勾選涉及的科目：</label>
                                 <div class="cross-subject-grid" id="crossSubjectCheckboxes"></div>
                             </div>
-
                         </div>
                         <div class="form-group" id="adminTypeGroup" style="display:none;">
                             <label>行政類別</label>
@@ -345,17 +291,43 @@
                     </div>
 
                     <div class="form-group">
-                        <label>連結 (URL)</label>
-                        <input type="text" id="appLink" class="form-control" placeholder="https://...">
+                        <label>檔案類型</label>
+                        <select id="resourceType" class="form-control" onchange="handleResourceTypeChange()">
+                            <option value="url">🌐 網頁連結 (URL)</option>
+                            <option value="image">🖼️ 圖片 (Image)</option>
+                            <option value="video">🎬 影片 (Video)</option>
+                            <option value="audio">🔊 聲音 (Audio)</option>
+                            <option value="presentation">📊 簡報 (PPT/Canva)</option>
+                            <option value="worksheet">📄 工作紙 (PDF/Word)</option>
+                            <option value="lessonplan">📝 教案 (Lesson Plan)</option>
+                        </select>
                     </div>
+
+                    <div class="form-group" id="linkInputGroup">
+                        <label id="linkLabel">連結 (URL)</label>
+                        <input type="text" id="appLink" class="form-control" placeholder="https://...">
+                        <small style="color:#7f8c8d; display:block; margin-top:5px;">💡 如為文件/影片，請貼上 Google Drive 或 YouTube 連結</small>
+                    </div>
+
+                    <div class="form-group" id="fileInputGroup" style="display:none;">
+                        <label>上傳圖片 (支援 JPG/PNG)</label>
+                        <input type="file" id="appFile" class="form-control" accept="image/*">
+                        <input type="hidden" id="appFileBase64">
+                        <div id="imagePreviewBox" style="margin-top:10px; max-width:200px; display:none;">
+                            <img id="imagePreview" src="" style="width:100%; border-radius:8px; border:1px solid #ddd;">
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label>解決了什麼難點？</label>
                         <input type="text" id="appPainPoint" class="form-control" placeholder="例如：節省了每週 2 小時的排版時間">
                     </div>
+                    
                     <div class="form-group">
-                        <label>簡介 (AI 將輔助標籤)</label>
-                        <textarea id="appDesc" class="form-control" rows="3" onblur="triggerAutoTag()" placeholder="請描述工具功能..."></textarea>
+                        <label>Prompt: (參考指令)</label>
+                        <textarea id="appPrompt" class="form-control" rows="4" style="font-family:monospace; background:#fafafa;" placeholder="請貼上生成此資源的 AI 指令... (AI 將以此輔助標籤)" onblur="triggerAutoTag()"></textarea>
                     </div>
+
                     <div class="form-group">
                         <label>5C+ / 關鍵字標籤 (可人手修改，用逗號分隔)</label>
                         <input type="text" id="appTags" class="form-control" value="General">
@@ -388,7 +360,7 @@
 
     <script>
         // ==========================================
-        // CONFIGURATION ZONE V2.3
+        // CONFIGURATION ZONE V2.4
         // ==========================================
         const firebaseConfig = {
           apiKey: "AIzaSyBPRN5_vnvMOPAR0fTVaZoqM57ffIGZOQU",
@@ -409,50 +381,24 @@
         let adminChartRef = null;
 
         const teacherDirectory = {
-            "lwysams@bcklas.edu.hk": "穎",
-            "slssams@bcklas.edu.hk": "珊",
-            "ckysams@bcklas.edu.hk": "徐",
-            "cymsams@bcklas.edu.hk": "文",
-            "lysams@bcklas.edu.hk": "燕",
-            "hhysams@bcklas.edu.hk": "侯",
-            "scysams@bcklas.edu.hk": "蘇",
-            "ccwsams@bcklas.edu.hk": "瑋",
-            "ynysams@bcklas.edu.hk": "楊",
-            "csysams@bcklas.edu.hk": "淑",
-            "dspsams@bcklas.edu.hk": "丁",
-            "cherry@bcklas.edu.hk": "Cherry",
-            "lslsams@bcklas.edu.hk": "鈴",
-            "cpy2sams@bcklas.edu.hk": "容",
-            "lsysams@bcklas.edu.hk": "呂",
-            "twksams@bcklas.edu.hk": "慧",
-            "wpwsams@bcklas.edu.hk": "榮",
-            "skysams@bcklas.edu.hk": "兒",
-            "cym2sams@bcklas.edu.hk": "綺",
-            "swysams@bcklas.edu.hk": "沈",
-            "whwsams@bcklas.edu.hk": "馨",
+            "lwysams@bcklas.edu.hk": "穎", "slssams@bcklas.edu.hk": "珊", "ckysams@bcklas.edu.hk": "徐",
+            "cymsams@bcklas.edu.hk": "文", "lysams@bcklas.edu.hk": "燕", "hhysams@bcklas.edu.hk": "侯",
+            "scysams@bcklas.edu.hk": "蘇", "ccwsams@bcklas.edu.hk": "瑋", "ynysams@bcklas.edu.hk": "楊",
+            "csysams@bcklas.edu.hk": "淑", "dspsams@bcklas.edu.hk": "丁", "cherry@bcklas.edu.hk": "Cherry",
+            "lslsams@bcklas.edu.hk": "鈴", "cpy2sams@bcklas.edu.hk": "容", "lsysams@bcklas.edu.hk": "呂",
+            "twksams@bcklas.edu.hk": "慧", "wpwsams@bcklas.edu.hk": "榮", "skysams@bcklas.edu.hk": "兒",
+            "cym2sams@bcklas.edu.hk": "綺", "swysams@bcklas.edu.hk": "沈", "whwsams@bcklas.edu.hk": "馨",
             "ywysams@bcklas.edu.hk": "俞"
         };
 
         const subjectList = ["中文", "英文", "數學", "常識/科學", "人文", "視藝", "音樂", "體育", "圖書", "普通話", "佛學", "科技", "價值觀教育"];
-
-        const adminColors = {
-            "校務運作": "#3498db", "文書處理": "#9b59b6", "數據分析": "#2ecc71", 
-            "資訊通訊": "#e67e22", "活動策劃": "#e74c3c", "資源管理": "#f1c40f", "未分類": "#95a5a6"
-        };
-
-        const subjectColors = {
-            "中文": "#e74c3c", "英文": "#3498db", "數學": "#f39c12", "常識/科學": "#27ae60",
-            "人文": "#8e44ad", "視藝": "#e91e63", "音樂": "#1abc9c", "體育": "#34495e",
-            "圖書": "#d35400", "普通話": "#c0392b", "佛學": "#f1c40f", "科技": "#16a085",
-            "價值觀教育": "#e91e63", "跨課程": "#7f8c8d"
-        };
+        const adminColors = { "校務運作": "#3498db", "文書處理": "#9b59b6", "數據分析": "#2ecc71", "資訊通訊": "#e67e22", "活動策劃": "#e74c3c", "資源管理": "#f1c40f", "未分類": "#95a5a6" };
+        const subjectColors = { "中文": "#e74c3c", "英文": "#3498db", "數學": "#f39c12", "常識/科學": "#27ae60", "人文": "#8e44ad", "視藝": "#e91e63", "音樂": "#1abc9c", "體育": "#34495e", "圖書": "#d35400", "普通話": "#c0392b", "佛學": "#f1c40f", "科技": "#16a085", "價值觀教育": "#e91e63", "跨課程": "#7f8c8d" };
 
         function initSubjectCheckboxes() {
             const container = document.getElementById('crossSubjectCheckboxes');
             container.innerHTML = '';
-            subjectList.forEach(sub => {
-                container.innerHTML += `<label class="checkbox-label"><input type="checkbox" name="crossSub" value="${sub}"> ${sub}</label>`;
-            });
+            subjectList.forEach(sub => { container.innerHTML += `<label class="checkbox-label"><input type="checkbox" name="crossSub" value="${sub}"> ${sub}</label>`; });
         }
         initSubjectCheckboxes();
 
@@ -480,12 +426,7 @@
 
         function logout() { auth.signOut().then(() => location.reload()); }
         function updateUserDisplay() { document.getElementById('currentUserDisplay').innerText = currentUser.name; }
-
-        // V2.3 Toggle Function
-        function toggleSidebar() {
-            document.querySelector('.sidebar').classList.toggle('active');
-            document.querySelector('.sidebar-overlay').classList.toggle('active');
-        }
+        function toggleSidebar() { document.querySelector('.sidebar').classList.toggle('active'); document.querySelector('.sidebar-overlay').classList.toggle('active'); }
 
         async function loadData() {
             try {
@@ -493,39 +434,44 @@
                 const apps = appsSnap.docs.map(doc => ({id: doc.id, ...doc.data()}));
                 const promptsSnap = await db.collection('prompts').orderBy('timestamp', 'desc').get();
                 const prompts = promptsSnap.docs.map(doc => ({id: doc.id, ...doc.data()}));
-                
                 renderDashboard(apps, prompts);
                 renderApps(apps);
                 renderPrompts(prompts);
-            } catch (e) {
-                console.error("Error loading data:", e);
+            } catch (e) { console.error("Error loading data:", e); }
+        }
+
+        // V2.4 Resource Type Handling
+        function handleResourceTypeChange() {
+            const type = document.getElementById('resourceType').value;
+            const linkGroup = document.getElementById('linkInputGroup');
+            const fileGroup = document.getElementById('fileInputGroup');
+            const linkLabel = document.getElementById('linkLabel');
+
+            if (type === 'image') {
+                linkGroup.style.display = 'none';
+                fileGroup.style.display = 'block';
+            } else {
+                linkGroup.style.display = 'block';
+                fileGroup.style.display = 'none';
+                if (type === 'video') linkLabel.innerText = "影片連結 (YouTube/Google Drive)";
+                else if (type === 'presentation' || type === 'worksheet' || type === 'lessonplan') linkLabel.innerText = "雲端硬碟連結 (Google Drive/OneDrive)";
+                else linkLabel.innerText = "網頁連結 (URL)";
             }
         }
 
-        function submitRating(appId) {
-            const easeVal = document.getElementById(`ease_${appId}`).value;
-            const effectVal = document.getElementById(`effect_${appId}`).value;
-            const updateData = {};
-            updateData[`ratings.${currentUser.uid}`] = { ease: parseInt(easeVal), effect: parseInt(effectVal) };
-            
-            db.collection('apps').doc(appId).update(updateData)
-                .then(() => { alert("評分成功！"); loadData(); })
-                .catch(e => {
-                     db.collection('apps').doc(appId).set({
-                        ratings: { [currentUser.uid]: { ease: parseInt(easeVal), effect: parseInt(effectVal) } }
-                     }, { merge: true }).then(() => { alert("評分成功！"); loadData(); });
-                });
-        }
-
-        function submitComment(appId) {
-            const input = document.getElementById(`comment_input_${appId}`);
-            const text = input.value.trim();
-            if(!text) return;
-            const newComment = { author: currentUser.name, content: text, timestamp: Date.now() };
-            db.collection('apps').doc(appId).update({ comments: firebase.firestore.FieldValue.arrayUnion(newComment) })
-            .then(() => loadData())
-            .catch(e => { db.collection('apps').doc(appId).set({ comments: [newComment] }, { merge: true }).then(() => loadData()); });
-        }
+        // Image Reader
+        document.getElementById('appFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    document.getElementById('appFileBase64').value = evt.target.result;
+                    document.getElementById('imagePreview').src = evt.target.result;
+                    document.getElementById('imagePreviewBox').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
 
         function renderApps(apps) {
             const container = document.getElementById('appsContainer');
@@ -535,7 +481,6 @@
                 
                 let catBadge = '';
                 let cardClass = app.category;
-                
                 if (app.category === 'teaching') {
                     if (app.subject === '跨課程') {
                         const validCrossSubs = (app.crossSubjects || []).filter(s => s && s.trim() !== "");
@@ -556,11 +501,32 @@
                 const isAuthor = (app.author === currentUser.name) || (app.authorEmail && app.authorEmail === currentUser.email);
                 const editBtn = isAuthor ? `<button class="btn btn-outline" style="font-size:0.7rem; float:right" onclick='editApp(${JSON.stringify(app)})'>✏️ 編輯</button>` : '';
                 
-                let imgHtml = `<div class="app-preview-placeholder"><span style="font-size:3rem">📱</span></div>`;
-                if(app.link && app.link.startsWith('http')) {
-                    imgHtml = `<img src="https://image.thum.io/get/width/600/allowJPG/${app.link}" class="app-preview" onerror="this.style.display='none'">`;
+                // V2.4 Dynamic Preview based on Resource Type
+                let previewHtml = '';
+                const type = app.resourceType || 'url';
+                
+                if (type === 'image' && app.link && app.link.startsWith('data:image')) {
+                    previewHtml = `<img src="${app.link}" class="app-preview" style="object-fit:contain;">`;
+                } else if (type === 'video') {
+                    previewHtml = `<div class="app-preview-placeholder"><div class="preview-icon">🎬</div><div class="preview-type">Video Resource</div></div>`;
+                } else if (type === 'audio') {
+                    previewHtml = `<div class="app-preview-placeholder"><div class="preview-icon">🔊</div><div class="preview-type">Audio Clip</div></div>`;
+                } else if (type === 'presentation') {
+                    previewHtml = `<div class="app-preview-placeholder"><div class="preview-icon">📊</div><div class="preview-type">Presentation</div></div>`;
+                } else if (type === 'worksheet') {
+                    previewHtml = `<div class="app-preview-placeholder"><div class="preview-icon">📄</div><div class="preview-type">Worksheet</div></div>`;
+                } else if (type === 'lessonplan') {
+                    previewHtml = `<div class="app-preview-placeholder"><div class="preview-icon">📝</div><div class="preview-type">Lesson Plan</div></div>`;
+                } else {
+                    // Default Web URL
+                    if(app.link && app.link.startsWith('http')) {
+                        previewHtml = `<img src="https://image.thum.io/get/width/600/allowJPG/${app.link}" class="app-preview" onerror="this.style.display='none'">`;
+                    } else {
+                        previewHtml = `<div class="app-preview-placeholder"><div class="preview-icon">🌐</div></div>`;
+                    }
                 }
 
+                // Ratings & Comments (Same as V2.3)
                 const ratings = app.ratings || {};
                 const ratingValues = Object.values(ratings);
                 let avgEase = "-", avgEffect = "-";
@@ -570,7 +536,6 @@
                     avgEase = (totalEase / ratingValues.length).toFixed(1);
                     avgEffect = (totalEffect / ratingValues.length).toFixed(1);
                 }
-
                 const hasRated = ratings[currentUser.uid];
                 let ratingHtml = hasRated 
                     ? `<div style="margin-top:5px; color:var(--success); font-size:0.85rem;">✅ 你已評價 (易: ${hasRated.ease}, 效: ${hasRated.effect})</div>`
@@ -578,19 +543,18 @@
 
                 let commentsHtml = '';
                 if(app.comments && app.comments.length > 0) {
-                    app.comments.forEach(c => {
-                        commentsHtml += `<div class="comment-item"><span class="comment-author">${c.author}：</span><span class="comment-content">${c.content}</span></div>`;
-                    });
-                } else {
-                    commentsHtml = `<div style="color:#ccc; font-style:italic; font-size:0.8rem; padding:5px 0;">暫無留言</div>`;
-                }
+                    app.comments.forEach(c => { commentsHtml += `<div class="comment-item"><span class="comment-author">${c.author}：</span><span class="comment-content">${c.content}</span></div>`; });
+                } else { commentsHtml = `<div style="color:#ccc; font-style:italic; font-size:0.8rem; padding:5px 0;">暫無留言</div>`; }
 
                 const dateObj = new Date(app.timestamp);
                 const dateStr = dateObj.toLocaleString('zh-HK', { timeZone: 'Asia/Hong_Kong', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false });
 
+                // V2.4 Display Prompt Box
+                const promptHtml = app.promptText ? `<div class="prompt-box" title="Prompt 指令">${app.promptText}</div>` : '';
+
                 let html = `
                     <div class="card ${cardClass}" data-cat="${app.category}" data-sub="${app.subject}">
-                        ${imgHtml}
+                        ${previewHtml}
                         <div class="card-content">
                             <h3 style="margin-top:0">${app.title} ${editBtn}</h3>
                             <div style="font-size:0.85rem; color:#7f8c8d; margin-bottom:10px;">
@@ -598,7 +562,7 @@
                             </div>
                             <div>${catBadge}</div>
                             <p style="font-size:0.9rem; color:#444"><strong>💡 解決難點：</strong> ${app.painPoint}</p>
-                            <p style="font-size:0.9rem; flex:1;">${app.desc}</p>
+                            ${promptHtml}
                             <div style="margin:10px 0;">${tagsHtml}</div>
                             
                             <div class="rating-badge-container">
@@ -615,7 +579,7 @@
                                     <button class="btn btn-primary btn-xs" onclick="submitComment('${app.id}')">送出</button>
                                 </div>
                             </div>
-                            <a href="${app.link}" target="_blank" class="btn btn-primary" style="display:block; text-align:center; margin-top:10px;">前往工具</a>
+                            <a href="${app.link}" target="_blank" class="btn btn-primary" style="display:block; text-align:center; margin-top:10px;">前往資源</a>
                         </div>
                     </div>
                 `;
@@ -623,186 +587,76 @@
             });
         }
 
+        // Functions for Dashboard, Prompts, Navigation (Same as V2.3)
         function renderDashboard(apps, prompts) {
             const teachingApps = apps.filter(a => a.category === 'teaching');
             const adminApps = apps.filter(a => a.category === 'admin');
-            
             document.getElementById('totalApps').innerText = teachingApps.length;
             document.getElementById('totalAdmin').innerText = adminApps.length;
             document.getElementById('totalPrompts').innerText = prompts.length;
             const authors = new Set([...apps.map(a=>a.author), ...prompts.map(p=>p.author)]);
             document.getElementById('activeTeachers').innerText = authors.size;
 
-            // 1. Teaching Radar
             const skillCounts = { "Communication":0, "Contribution":0, "Creativity":0, "Critical Thinking":0, "Collaboration":0 };
             teachingApps.forEach(a => { if(a.tags) a.tags.forEach(t => { if(skillCounts[t] !== undefined) skillCounts[t]++; }); });
-            const ctx1 = document.getElementById('teachingChart').getContext('2d');
             if(teachingChartRef) teachingChartRef.destroy();
-            teachingChartRef = new Chart(ctx1, {
-                type: 'radar',
-                data: {
-                    labels: Object.keys(skillCounts),
-                    datasets: [{ label: '5C+ 素養', data: Object.values(skillCounts), backgroundColor: 'rgba(52, 152, 219, 0.2)', borderColor: '#3498db' }]
-                },
-                options: { scales: { r: { beginAtZero: true, suggestMax: 5 } } }
-            });
+            teachingChartRef = new Chart(document.getElementById('teachingChart').getContext('2d'), { type: 'radar', data: { labels: Object.keys(skillCounts), datasets: [{ label: '5C+ 素養', data: Object.values(skillCounts), backgroundColor: 'rgba(52, 152, 219, 0.2)', borderColor: '#3498db' }] }, options: { scales: { r: { beginAtZero: true, suggestMax: 5 } } } });
 
-            // 2. Subject Pie
             const subjectCounts = {};
             teachingApps.forEach(a => { const subj = a.subject || "未分類"; subjectCounts[subj] = (subjectCounts[subj] || 0) + 1; });
-            const subLabels = Object.keys(subjectCounts);
-            const subBgColors = subLabels.map(l => subjectColors[l] || "#95a5a6");
-
-            const ctxSub = document.getElementById('subjectChart').getContext('2d');
             if(subjectChartRef) subjectChartRef.destroy();
-            subjectChartRef = new Chart(ctxSub, {
-                type: 'pie',
-                data: {
-                    labels: subLabels,
-                    datasets: [{ data: Object.values(subjectCounts), backgroundColor: subBgColors }]
-                }
-            });
+            subjectChartRef = new Chart(document.getElementById('subjectChart').getContext('2d'), { type: 'pie', data: { labels: Object.keys(subjectCounts), datasets: [{ data: Object.values(subjectCounts), backgroundColor: Object.keys(subjectCounts).map(l => subjectColors[l] || "#95a5a6") }] } });
 
-            // 3. Admin Bar
             const adminCounts = {};
             adminApps.forEach(a => { const type = a.adminType || "未分類"; adminCounts[type] = (adminCounts[type] || 0) + 1; });
-            const bgColors = Object.keys(adminCounts).map(type => adminColors[type] || "#34495e");
-            const ctx2 = document.getElementById('adminChart').getContext('2d');
             if(adminChartRef) adminChartRef.destroy();
-            adminChartRef = new Chart(ctx2, {
-                type: 'bar',
-                data: { labels: Object.keys(adminCounts), datasets: [{ label: '行政工具分類', data: Object.values(adminCounts), backgroundColor: bgColors, borderWidth: 1 }] },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, plugins: { legend: { display: false } } }
-            });
+            adminChartRef = new Chart(document.getElementById('adminChart').getContext('2d'), { type: 'bar', data: { labels: Object.keys(adminCounts), datasets: [{ label: '行政工具分類', data: Object.values(adminCounts), backgroundColor: Object.keys(adminCounts).map(t => adminColors[t] || "#34495e"), borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, plugins: { legend: { display: false } } } });
 
-            // 4. Leaderboard
             const authorStats = {};
-            Object.values(teacherDirectory).forEach(name => {
-                authorStats[name] = { count: 0, totalScore: 0, maxScore: 0, bestItem: null };
-            });
-
+            Object.values(teacherDirectory).forEach(name => { authorStats[name] = { count: 0, totalScore: 0, maxScore: 0, bestItem: null }; });
             [...apps, ...prompts].forEach(item => {
                 const author = item.author;
-                if(!authorStats[author]) authorStats[author] = { count: 0, totalScore: 0, maxScore: 0, bestItem: null }; 
-                
+                if(!authorStats[author]) authorStats[author] = { count: 0, totalScore: 0, maxScore: 0, bestItem: null };
                 let itemAvg = 0;
-                if (item.ratings) {
-                    const rVals = Object.values(item.ratings);
-                    if (rVals.length > 0) {
-                        const sum = rVals.reduce((acc, r) => acc + (r.ease + r.effect)/2, 0);
-                        itemAvg = sum / rVals.length;
-                    }
-                }
-                
-                const s = authorStats[author];
-                s.count++;
-                s.totalScore += itemAvg;
+                if (item.ratings) { const rVals = Object.values(item.ratings); if (rVals.length > 0) itemAvg = rVals.reduce((acc, r) => acc + (r.ease + r.effect)/2, 0) / rVals.length; }
+                const s = authorStats[author]; s.count++; s.totalScore += itemAvg;
                 if(itemAvg > s.maxScore) { s.maxScore = itemAvg; s.bestItem = item; }
-                if(!s.bestItem) s.bestItem = item; 
+                if(!s.bestItem) s.bestItem = item;
             });
-            
-            const sortedAuthors = Object.keys(authorStats).sort((a,b) => {
-                if(authorStats[b].count !== authorStats[a].count) return authorStats[b].count - authorStats[a].count;
-                return authorStats[b].maxScore - authorStats[a].maxScore;
-            });
-
-            const lb = document.getElementById('leaderboardList');
-            lb.innerHTML = '';
-            
+            const sortedAuthors = Object.keys(authorStats).sort((a,b) => { if(authorStats[b].count !== authorStats[a].count) return authorStats[b].count - authorStats[a].count; return authorStats[b].maxScore - authorStats[a].maxScore; });
+            const lb = document.getElementById('leaderboardList'); lb.innerHTML = '';
             sortedAuthors.forEach((name, index) => {
                 const stat = authorStats[name];
                 const bestTitle = stat.bestItem ? (stat.bestItem.title.length > 8 ? stat.bestItem.title.substring(0,8)+"..." : stat.bestItem.title) : "尚無作品";
-                const linkAction = stat.bestItem && stat.bestItem.link ? `href="${stat.bestItem.link}" target="_blank"` : `href="#" style="pointer-events:none; color:#ccc; border-color:#ccc"`;
+                const linkAction = stat.bestItem && stat.bestItem.link ? `href="${stat.bestItem.link}" target="_blank"` : `href="#" style="pointer-events:none; color:#ccc"`;
                 const maxScoreDisp = stat.maxScore > 0 ? stat.maxScore.toFixed(1) : "-";
-                const countClass = stat.count > 0 ? "lb-highlight" : "lb-highlight-dim";
-
-                lb.innerHTML += `
-                    <div class="leaderboard-item">
-                        <div class="lb-rank">#${index+1}</div>
-                        <div class="lb-name">${name}</div>
-                        <div class="lb-stats">
-                            <div><span class="${countClass}" style="${stat.count===0?'color:#ccc':''}">${stat.count}</span> 貢獻</div>
-                            <div style="font-size:0.75rem;">最高分: ★${maxScoreDisp} <a ${linkAction} class="lb-link">GO: ${bestTitle}</a></div>
-                        </div>
-                    </div>`;
+                lb.innerHTML += `<div class="leaderboard-item"><div class="lb-rank">#${index+1}</div><div class="lb-name">${name}</div><div class="lb-stats"><div><span class="${stat.count>0?'lb-highlight':'lb-highlight-dim'}" style="${stat.count===0?'color:#ccc':''}">${stat.count}</span> 貢獻</div><div style="font-size:0.75rem;">最高分: ★${maxScoreDisp} <a ${linkAction} class="lb-link">GO: ${bestTitle}</a></div></div></div>`;
             });
         }
 
         function renderPrompts(prompts) {
-            const container = document.getElementById('promptsContainer');
-            container.innerHTML = '';
+            const container = document.getElementById('promptsContainer'); container.innerHTML = '';
             prompts.forEach(p => {
-                const isAuthor = (p.author === currentUser.name) || (p.authorEmail && p.authorEmail === currentUser.email);
-                const editBtn = isAuthor ? `<button class="btn btn-outline" style="font-size:0.7rem; float:right" onclick='editPrompt(${JSON.stringify(p)})'>✏️</button>` : '';
-                
-                const dateObj = new Date(p.timestamp);
-                const dateStr = dateObj.toLocaleString('zh-HK', { timeZone: 'Asia/Hong_Kong', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false });
-
-                container.innerHTML += `
-                    <div class="card">
-                        <div class="card-content">
-                            <h3>${p.title} ${editBtn} <small style="font-size:0.8rem; display:block; margin-top:5px; font-weight:normal">${p.author} • ${dateStr}</small></h3>
-                            <p><strong>🎯 用途：</strong>${p.purpose}</p>
-                            <div style="background:#2c3e50; color:#2ecc71; padding:15px; border-radius:8px; font-family:monospace; margin:10px 0; max-height:150px; overflow-y:auto; white-space:pre-wrap; font-size:0.9rem;">${p.content}</div>
-                            <button class="btn btn-outline" onclick="navigator.clipboard.writeText(\`${p.content}\`);alert('已複製！')">複製指令</button>
-                        </div>
-                    </div>`;
+                const dateStr = new Date(p.timestamp).toLocaleString('zh-HK', { timeZone: 'Asia/Hong_Kong', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+                container.innerHTML += `<div class="card"><div class="card-content"><h3>${p.title} <small style="font-size:0.8rem; font-weight:normal">${p.author} • ${dateStr}</small></h3><p><strong>🎯 用途：</strong>${p.purpose}</p><div style="background:#2c3e50; color:#2ecc71; padding:15px; border-radius:8px; font-family:monospace; margin:10px 0; max-height:150px; overflow-y:auto; font-size:0.9rem;">${p.content}</div><button class="btn btn-outline" onclick="navigator.clipboard.writeText(\`${p.content}\`);alert('已複製！')">複製指令</button></div></div>`;
             });
         }
 
-        function showPage(pageId) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-            document.querySelectorAll('.menu-item').forEach(item => {
-                item.classList.remove('active');
-                if(item.getAttribute('onclick').includes(`'${pageId}'`)) item.classList.add('active');
-            });
-            // V2.3 Close sidebar on mobile when page changes
-            if(window.innerWidth <= 768) {
-                document.querySelector('.sidebar').classList.remove('active');
-                document.querySelector('.sidebar-overlay').classList.remove('active');
-            }
-        }
-
-        function filterApps(type) {
-            const cards = document.querySelectorAll('.card');
-            cards.forEach(c => {
-                c.style.display = 'none';
-                const cat = c.getAttribute('data-cat');
-                const sub = c.getAttribute('data-sub');
-                if (type === 'all') c.style.display = 'flex';
-                else if (type === 'value') { if(sub === '價值觀教育') c.style.display = 'flex'; }
-                else if (cat === type) c.style.display = 'flex';
-            });
-        }
-
-        function handleCategoryChange() {
-            const cat = document.getElementById('appCategory').value;
-            const subEl = document.getElementById('appSubject');
-            const adminEl = document.getElementById('adminTypeGroup');
-            const subGroup = document.getElementById('subjectGroup');
-            if (cat === 'admin') { subEl.disabled = true; subGroup.style.opacity = "0.5"; adminEl.style.display = 'block'; } 
-            else { subEl.disabled = false; subGroup.style.opacity = "1"; adminEl.style.display = 'none'; }
-        }
-        
-        function handleSubjectChange() {
-            const sub = document.getElementById('appSubject').value;
-            const crossSection = document.getElementById('crossSubjectSection');
-            if (sub === '跨課程') {
-                crossSection.style.display = 'block';
-            } else {
-                crossSection.style.display = 'none';
-                document.querySelectorAll('input[name="crossSub"]').forEach(cb => cb.checked = false);
-            }
-        }
+        function showPage(pageId) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(pageId).classList.add('active'); if(window.innerWidth<=768) toggleSidebar(); }
+        function filterApps(type) { document.querySelectorAll('.card').forEach(c => { c.style.display = 'none'; const cat=c.getAttribute('data-cat'), sub=c.getAttribute('data-sub'); if(type==='all' || (type==='value'&&sub==='價值觀教育') || cat===type) c.style.display='flex'; }); }
+        function handleCategoryChange() { const cat = document.getElementById('appCategory').value; document.getElementById('appSubject').disabled = cat === 'admin'; document.getElementById('adminTypeGroup').style.display = cat === 'admin' ? 'block' : 'none'; document.getElementById('subjectGroup').style.opacity = cat === 'admin' ? '0.5' : '1'; }
+        function handleSubjectChange() { const sub = document.getElementById('appSubject').value; document.getElementById('crossSubjectSection').style.display = sub === '跨課程' ? 'block' : 'none'; }
+        function submitComment(appId) { const input = document.getElementById(`comment_input_${appId}`); const text = input.value.trim(); if(!text) return; const newComment = { author: currentUser.name, content: text, timestamp: Date.now() }; db.collection('apps').doc(appId).update({ comments: firebase.firestore.FieldValue.arrayUnion(newComment) }).then(() => loadData()).catch(e => { db.collection('apps').doc(appId).set({ comments: [newComment] }, { merge: true }).then(() => loadData()); }); }
+        function submitRating(appId) { const ease = document.getElementById(`ease_${appId}`).value, effect = document.getElementById(`effect_${appId}`).value; const data = {}; data[`ratings.${currentUser.uid}`] = { ease: parseInt(ease), effect: parseInt(effect) }; db.collection('apps').doc(appId).update(data).then(() => { alert("評分成功！"); loadData(); }).catch(e => { db.collection('apps').doc(appId).set({ ratings: { [currentUser.uid]: { ease: parseInt(ease), effect: parseInt(effect) } } }, { merge: true }).then(() => { alert("評分成功！"); loadData(); }); }); }
 
         function triggerAutoTag() {
-            const desc = document.getElementById('appDesc').value;
+            // V2.4 Updated to use Prompt Text
+            const prompt = document.getElementById('appPrompt').value;
             const title = document.getElementById('appTitle').value;
             const currentTags = document.getElementById('appTags').value;
             if(currentTags === '' || currentTags === 'General') {
                 let tags = [];
-                const combined = desc + title;
+                const combined = prompt + title;
                 if(combined.includes("畫") || combined.includes("創")) tags.push("Creativity");
                 if(combined.includes("問") || combined.includes("思")) tags.push("Critical Thinking");
                 if(combined.includes("組") || combined.includes("合")) tags.push("Collaboration");
@@ -821,44 +675,35 @@
         function submitUpload() {
             const isEdit = document.getElementById('editModeId').value !== "";
             const collection = document.getElementById('uploadType').value === 'app' ? 'apps' : 'prompts';
-            const data = {
-                title: document.getElementById(collection === 'apps' ? 'appTitle' : 'promptTitle').value,
-                author: currentUser.name,
-                authorEmail: currentUser.email,
-                timestamp: Date.now()
-            };
+            const data = { title: document.getElementById(collection === 'apps' ? 'appTitle' : 'promptTitle').value, author: currentUser.name, authorEmail: currentUser.email, timestamp: Date.now() };
 
             if(collection === 'apps') {
                 let crossSubs = [];
-                if(document.getElementById('appSubject').value === '跨課程') {
-                    document.querySelectorAll('input[name="crossSub"]:checked').forEach(cb => {
-                        if(cb.value) crossSubs.push(cb.value);
-                    });
+                if(document.getElementById('appSubject').value === '跨課程') { document.querySelectorAll('input[name="crossSub"]:checked').forEach(cb => { if(cb.value) crossSubs.push(cb.value); }); }
+                
+                const rType = document.getElementById('resourceType').value;
+                let finalLink = document.getElementById('appLink').value;
+                // Use Base64 if image upload
+                if(rType === 'image' && document.getElementById('appFileBase64').value) {
+                    finalLink = document.getElementById('appFileBase64').value;
                 }
+
                 Object.assign(data, {
                     category: document.getElementById('appCategory').value,
                     subject: document.getElementById('appSubject').value,
                     crossSubjects: crossSubs,
                     adminType: document.getElementById('appAdminType').value,
-                    link: document.getElementById('appLink').value,
+                    resourceType: rType, // V2.4 New Field
+                    link: finalLink,
                     painPoint: document.getElementById('appPainPoint').value,
-                    desc: document.getElementById('appDesc').value,
+                    promptText: document.getElementById('appPrompt').value, // V2.4 New Field
                     tags: document.getElementById('appTags').value.split(',').map(s=>s.trim())
                 });
                 if(!isEdit) data.ratings = {}; 
-            } else {
-                Object.assign(data, { content: document.getElementById('promptContent').value, purpose: document.getElementById('promptPurpose').value });
-            }
+            } else { Object.assign(data, { content: document.getElementById('promptContent').value, purpose: document.getElementById('promptPurpose').value }); }
 
-            const action = isEdit 
-                ? db.collection(collection).doc(document.getElementById('editModeId').value).update(data)
-                : db.collection(collection).add(data);
-
-            action.then(() => {
-                alert(isEdit ? "更新成功" : "發布成功");
-                resetForm(true); 
-                loadData();
-            }).catch(e => alert("錯誤: " + e.message));
+            const action = isEdit ? db.collection(collection).doc(document.getElementById('editModeId').value).update(data) : db.collection(collection).add(data);
+            action.then(() => { alert(isEdit ? "更新成功" : "發布成功"); resetForm(true); loadData(); }).catch(e => alert("錯誤: " + e.message));
         }
 
         function deleteResource() {
@@ -880,16 +725,22 @@
             handleCategoryChange();
             document.getElementById('appSubject').value = app.subject || "";
             handleSubjectChange(); 
-            if (app.subject === '跨課程' && app.crossSubjects) {
-                app.crossSubjects.forEach(sub => {
-                    const cb = document.querySelector(`input[name="crossSub"][value="${sub}"]`);
-                    if(cb) cb.checked = true;
-                });
-            }
+            if (app.subject === '跨課程' && app.crossSubjects) { app.crossSubjects.forEach(sub => { const cb = document.querySelector(`input[name="crossSub"][value="${sub}"]`); if(cb) cb.checked = true; }); }
             document.getElementById('appAdminType').value = app.adminType || "";
-            document.getElementById('appLink').value = app.link;
+            
+            // V2.4 Populate New Fields
+            document.getElementById('resourceType').value = app.resourceType || 'url';
+            handleResourceTypeChange(); // Toggle UI
+            if(app.resourceType === 'image' && app.link.startsWith('data:')) {
+                document.getElementById('imagePreview').src = app.link;
+                document.getElementById('imagePreviewBox').style.display = 'block';
+                document.getElementById('appFileBase64').value = app.link;
+            } else {
+                document.getElementById('appLink').value = app.link;
+            }
+            
             document.getElementById('appPainPoint').value = app.painPoint;
-            document.getElementById('appDesc').value = app.desc;
+            document.getElementById('appPrompt').value = app.promptText || ""; // V2.4
             document.getElementById('appTags').value = Array.isArray(app.tags) ? app.tags.join(", ") : app.tags;
             
             const btn = document.getElementById('submitBtn');
@@ -920,6 +771,11 @@
             document.getElementById('appTags').value = "General";
             document.querySelectorAll('input[name="crossSub"]').forEach(cb => cb.checked = false);
             document.getElementById('crossSubjectSection').style.display = 'none';
+            document.getElementById('imagePreviewBox').style.display = 'none'; // Hide preview
+            document.getElementById('appFileBase64').value = "";
+            document.getElementById('resourceType').value = "url"; // Reset type
+            handleResourceTypeChange();
+
             const btn = document.getElementById('submitBtn');
             btn.innerText = "確認發布";
             btn.classList.replace('btn-success', 'btn-primary');
@@ -933,12 +789,12 @@
 
         function exportDataReport() {
             db.collection('apps').get().then(snap => {
-                let csv = "data:text/csv;charset=utf-8,\uFEFFID,Title,Category,Subject/Type,CrossSubs,Author,PainPoint\n";
+                let csv = "data:text/csv;charset=utf-8,\uFEFFID,Title,Category,Subject/Type,ResourceType,Author,PainPoint\n";
                 snap.forEach(doc => {
                     const d = doc.data();
                     const sub = d.category==='teaching' ? d.subject : d.adminType;
-                    const cross = d.crossSubjects ? d.crossSubjects.join(';') : '';
-                    csv += `${doc.id},${d.title},${d.category},${sub},${cross},${d.author},"${d.painPoint}"\n`;
+                    const rType = d.resourceType || 'url';
+                    csv += `${doc.id},${d.title},${d.category},${sub},${rType},${d.author},"${d.painPoint}"\n`;
                 });
                 const link = document.createElement("a");
                 link.setAttribute("href", encodeURI(csv));
