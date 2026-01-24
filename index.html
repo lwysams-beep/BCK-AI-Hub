@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BCK-AI Hub | 正覺蓮社 AI 智慧庫 V2.1</title>
+    <title>BCK-AI Hub | 正覺蓮社 AI 智慧庫 V2.2</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -11,7 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     
     <style>
-        /* CSS V2.1 */
+        /* CSS V2.2 */
         :root {
             --primary: #2c3e50;
             --accent: #3498db;
@@ -49,7 +49,6 @@
         .app-preview { width: 100%; height: 180px; object-fit: contain; background-color: #e0e0e0; border-bottom: 1px solid #ddd; display: block; }
         .app-preview-placeholder { height: 180px; background: linear-gradient(135deg, #e0e0e0, #f5f5f5); display: flex; align-items: center; justify-content: center; color: #aaa; font-size: 2rem; }
 
-        /* Dynamic Border Colors based on category will be handled inline or via JS classes if complex */
         .card.teaching { border-top: 5px solid var(--accent); }
         .card.admin { border-top: 5px solid var(--admin-color); }
         .card.value-edu { border-top: 5px solid var(--value-edu-color); }
@@ -112,7 +111,7 @@
 
     <div id="loginModal">
         <div class="login-box">
-            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V2.1</h2>
+            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V2.2</h2>
             <p style="color:#7f8c8d; margin-bottom:20px;">請使用校方派發的帳號登入</p>
             <input type="email" id="loginEmail" class="form-control" placeholder="Email" style="margin-bottom:10px;">
             <input type="password" id="loginPass" class="form-control" placeholder="Password" style="margin-bottom:20px;">
@@ -310,7 +309,7 @@
 
     <script>
         // ==========================================
-        // CONFIGURATION ZONE V2.1
+        // CONFIGURATION ZONE V2.2
         // ==========================================
         const firebaseConfig = {
           apiKey: "AIzaSyBPRN5_vnvMOPAR0fTVaZoqM57ffIGZOQU",
@@ -357,32 +356,16 @@
 
         const subjectList = ["中文", "英文", "數學", "常識/科學", "人文", "視藝", "音樂", "體育", "圖書", "普通話", "佛學", "科技", "價值觀教育"];
 
-        // Color Palettes V2.1
         const adminColors = {
-            "校務運作": "#3498db", // Blue
-            "文書處理": "#9b59b6", // Purple
-            "數據分析": "#2ecc71", // Green
-            "資訊通訊": "#e67e22", // Orange
-            "活動策劃": "#e74c3c", // Red
-            "資源管理": "#f1c40f", // Yellow
-            "未分類": "#95a5a6"
+            "校務運作": "#3498db", "文書處理": "#9b59b6", "數據分析": "#2ecc71", 
+            "資訊通訊": "#e67e22", "活動策劃": "#e74c3c", "資源管理": "#f1c40f", "未分類": "#95a5a6"
         };
 
         const subjectColors = {
-            "中文": "#e74c3c", // Red
-            "英文": "#3498db", // Blue
-            "數學": "#f39c12", // Orange
-            "常識/科學": "#27ae60", // Green
-            "人文": "#8e44ad", // Purple
-            "視藝": "#e91e63", // Pink
-            "音樂": "#1abc9c", // Teal
-            "體育": "#34495e", // Dark Blue
-            "圖書": "#d35400", // Pumpkin
-            "普通話": "#c0392b", // Dark Red
-            "佛學": "#f1c40f", // Yellow
-            "科技": "#16a085", // Sea Green
-            "價值觀教育": "#e91e63", // Pink
-            "跨課程": "#7f8c8d" // Grey
+            "中文": "#e74c3c", "英文": "#3498db", "數學": "#f39c12", "常識/科學": "#27ae60",
+            "人文": "#8e44ad", "視藝": "#e91e63", "音樂": "#1abc9c", "體育": "#34495e",
+            "圖書": "#d35400", "普通話": "#c0392b", "佛學": "#f1c40f", "科技": "#16a085",
+            "價值觀教育": "#e91e63", "跨課程": "#7f8c8d"
         };
 
         function initSubjectCheckboxes() {
@@ -470,7 +453,6 @@
                 
                 if (app.category === 'teaching') {
                     if (app.subject === '跨課程') {
-                        // V2.1 Fix: Ensure only valid cross subjects are displayed
                         const validCrossSubs = (app.crossSubjects || []).filter(s => s && s.trim() !== "");
                         const crossText = validCrossSubs.length > 0 ? validCrossSubs.join(' + ') : '綜合';
                         catBadge = `<span class="tag" style="background:#7f8c8d; color:white">跨課程: ${crossText}</span>`;
@@ -478,12 +460,10 @@
                         catBadge = `<span class="tag" style="background:var(--value-edu-color); color:white">💗 ${app.subject}</span>`;
                         cardClass = 'value-edu';
                     } else {
-                        // V2.1: Use subjectColors
                         const color = subjectColors[app.subject] || 'var(--accent)';
                         catBadge = `<span class="tag" style="background:${color}; color:white">學教評: ${app.subject}</span>`;
                     }
                 } else {
-                    // V2.1: Use adminColors
                     const color = adminColors[app.adminType] || 'var(--admin-color)';
                     catBadge = `<span class="tag" style="background:${color}; color:white">行政: ${app.adminType}</span>`;
                 }
@@ -520,12 +500,18 @@
                     commentsHtml = `<div style="color:#ccc; font-style:italic; font-size:0.8rem; padding:5px 0;">暫無留言</div>`;
                 }
 
+                // V2.2 Date Formatting
+                const dateObj = new Date(app.timestamp);
+                const dateStr = dateObj.toLocaleString('zh-HK', { timeZone: 'Asia/Hong_Kong', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false });
+
                 let html = `
                     <div class="card ${cardClass}" data-cat="${app.category}" data-sub="${app.subject}">
                         ${imgHtml}
                         <div class="card-content">
                             <h3 style="margin-top:0">${app.title} ${editBtn}</h3>
-                            <div style="font-size:0.85rem; color:#7f8c8d; margin-bottom:10px;">由 ${app.author} 提供</div>
+                            <div style="font-size:0.85rem; color:#7f8c8d; margin-bottom:10px;">
+                                由 ${app.author} 提供 • <span style="font-size:0.75rem">${dateStr}</span>
+                            </div>
                             <div>${catBadge}</div>
                             <p style="font-size:0.9rem; color:#444"><strong>💡 解決難點：</strong> ${app.painPoint}</p>
                             <p style="font-size:0.9rem; flex:1;">${app.desc}</p>
@@ -577,7 +563,7 @@
                 options: { scales: { r: { beginAtZero: true, suggestMax: 5 } } }
             });
 
-            // 2. Subject Pie - V2.1 Consistent Colors
+            // 2. Subject Pie - Consistent Colors
             const subjectCounts = {};
             teachingApps.forEach(a => { const subj = a.subject || "未分類"; subjectCounts[subj] = (subjectCounts[subj] || 0) + 1; });
             const subLabels = Object.keys(subjectCounts);
@@ -593,7 +579,7 @@
                 }
             });
 
-            // 3. Admin Bar - V2.1 Consistent Colors
+            // 3. Admin Bar - Consistent Colors
             const adminCounts = {};
             adminApps.forEach(a => { const type = a.adminType || "未分類"; adminCounts[type] = (adminCounts[type] || 0) + 1; });
             const bgColors = Object.keys(adminCounts).map(type => adminColors[type] || "#34495e");
@@ -605,16 +591,15 @@
                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, plugins: { legend: { display: false } } }
             });
 
-            // 4. Leaderboard - V2.1 Include ALL Teachers
+            // 4. Leaderboard - Include ALL Teachers
             const authorStats = {};
-            // Init with all teachers from directory
             Object.values(teacherDirectory).forEach(name => {
                 authorStats[name] = { count: 0, totalScore: 0, maxScore: 0, bestItem: null };
             });
 
             [...apps, ...prompts].forEach(item => {
                 const author = item.author;
-                if(!authorStats[author]) authorStats[author] = { count: 0, totalScore: 0, maxScore: 0, bestItem: null }; // Fallback for unknown authors
+                if(!authorStats[author]) authorStats[author] = { count: 0, totalScore: 0, maxScore: 0, bestItem: null }; 
                 
                 let itemAvg = 0;
                 if (item.ratings) {
@@ -632,7 +617,6 @@
                 if(!s.bestItem) s.bestItem = item; 
             });
             
-            // Sort by count desc, then maxScore desc
             const sortedAuthors = Object.keys(authorStats).sort((a,b) => {
                 if(authorStats[b].count !== authorStats[a].count) return authorStats[b].count - authorStats[a].count;
                 return authorStats[b].maxScore - authorStats[a].maxScore;
@@ -641,9 +625,6 @@
             const lb = document.getElementById('leaderboardList');
             lb.innerHTML = '';
             
-            // Display all (scrollable container handled by CSS max-height logic if needed, currently list is just appended)
-            // Or limit to top 10? Requirement says "should default have all participating codes". 
-            // We will list all, user can scroll page.
             sortedAuthors.forEach((name, index) => {
                 const stat = authorStats[name];
                 const bestTitle = stat.bestItem ? (stat.bestItem.title.length > 8 ? stat.bestItem.title.substring(0,8)+"..." : stat.bestItem.title) : "尚無作品";
@@ -669,10 +650,15 @@
             prompts.forEach(p => {
                 const isAuthor = (p.author === currentUser.name) || (p.authorEmail && p.authorEmail === currentUser.email);
                 const editBtn = isAuthor ? `<button class="btn btn-outline" style="font-size:0.7rem; float:right" onclick='editPrompt(${JSON.stringify(p)})'>✏️</button>` : '';
+                
+                // V2.2 Date Formatting
+                const dateObj = new Date(p.timestamp);
+                const dateStr = dateObj.toLocaleString('zh-HK', { timeZone: 'Asia/Hong_Kong', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false });
+
                 container.innerHTML += `
                     <div class="card">
                         <div class="card-content">
-                            <h3>${p.title} ${editBtn} <small style="font-size:0.8rem; display:block; margin-top:5px; font-weight:normal">${p.author}</small></h3>
+                            <h3>${p.title} ${editBtn} <small style="font-size:0.8rem; display:block; margin-top:5px; font-weight:normal">${p.author} • ${dateStr}</small></h3>
                             <p><strong>🎯 用途：</strong>${p.purpose}</p>
                             <div style="background:#2c3e50; color:#2ecc71; padding:15px; border-radius:8px; font-family:monospace; margin:10px 0; max-height:150px; overflow-y:auto; white-space:pre-wrap; font-size:0.9rem;">${p.content}</div>
                             <button class="btn btn-outline" onclick="navigator.clipboard.writeText(\`${p.content}\`);alert('已複製！')">複製指令</button>
@@ -757,7 +743,6 @@
             if(collection === 'apps') {
                 let crossSubs = [];
                 if(document.getElementById('appSubject').value === '跨課程') {
-                    // V2.1 Fix: Ensure only valid values are pushed
                     document.querySelectorAll('input[name="crossSub"]:checked').forEach(cb => {
                         if(cb.value) crossSubs.push(cb.value);
                     });
@@ -807,7 +792,6 @@
             handleCategoryChange();
             document.getElementById('appSubject').value = app.subject || "";
             handleSubjectChange(); 
-            // V2.1 Fix: Correctly check boxes on edit
             if (app.subject === '跨課程' && app.crossSubjects) {
                 app.crossSubjects.forEach(sub => {
                     const cb = document.querySelector(`input[name="crossSub"][value="${sub}"]`);
