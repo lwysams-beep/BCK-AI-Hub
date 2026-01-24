@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BCK-AI Hub | 正覺蓮社 AI 智慧庫 V2.6</title>
+    <title>BCK-AI Hub | 正覺蓮社 AI 智慧庫 V2.7</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -11,7 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     
     <style>
-        /* CSS V2.6 Stable */
+        /* CSS V2.7 */
         :root {
             --primary: #2c3e50;
             --accent: #3498db;
@@ -114,9 +114,11 @@
         .form-control:disabled { background-color: #e9ecef; cursor: not-allowed; opacity: 0.7; }
         .prompt-box { background: #f8f9fa; border-left: 3px solid #f39c12; padding: 10px; font-size: 0.85rem; color: #555; margin-bottom: 10px; white-space: pre-wrap; font-family: monospace; max-height: 80px; overflow-y: auto;}
         
-        .cross-subject-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef; margin-top: 10px; }
-        .checkbox-label { display: flex; align-items: center; font-size: 0.9rem; cursor: pointer; }
-        .checkbox-label input { margin-right: 8px; transform: scale(1.2); }
+        /* Checkbox Grid Styles */
+        .cross-subject-grid, .tags-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef; margin-top: 5px; }
+        .checkbox-label { display: flex; align-items: center; font-size: 0.9rem; cursor: pointer; color: #555; }
+        .checkbox-label input { margin-right: 8px; transform: scale(1.1); }
+        .tag-category-title { font-size: 0.85rem; color: var(--accent); font-weight: bold; margin-top: 10px; margin-bottom: 5px; width: 100%; grid-column: 1 / -1; border-bottom: 1px solid #e0e0e0; padding-bottom: 5px;}
 
         #loginModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.9); display: flex; justify-content: center; align-items: center; z-index: 1000; }
         .login-box { background: white; padding: 40px; border-radius: 15px; width: 320px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
@@ -146,7 +148,7 @@
 
     <div id="loginModal">
         <div class="login-box">
-            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V2.6</h2>
+            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V2.7</h2>
             <p style="color:#7f8c8d; margin-bottom:20px;">請使用校方派發的帳號登入</p>
             <input type="email" id="loginEmail" class="form-control" placeholder="Email" style="margin-bottom:10px;">
             <input type="password" id="loginPass" class="form-control" placeholder="Password" style="margin-bottom:20px;">
@@ -347,8 +349,9 @@
                     </div>
 
                     <div class="form-group">
-                        <label>5C+ / 關鍵字標籤 (可人手修改，用逗號分隔)</label>
-                        <input type="text" id="appTags" class="form-control" value="General">
+                        <label>5C+ / 關鍵字標籤 (可複選)</label>
+                        <div id="tagsCheckboxContainer" class="tags-grid">
+                            </div>
                     </div>
                 </div>
 
@@ -410,12 +413,36 @@
         const adminColors = { "校務運作": "#3498db", "文書處理": "#9b59b6", "數據分析": "#2ecc71", "資訊通訊": "#e67e22", "活動策劃": "#e74c3c", "資源管理": "#f1c40f", "未分類": "#95a5a6" };
         const subjectColors = { "中文": "#e74c3c", "英文": "#3498db", "數學": "#f39c12", "常識/科學": "#27ae60", "人文": "#8e44ad", "視藝": "#e91e63", "音樂": "#1abc9c", "體育": "#34495e", "圖書": "#d35400", "普通話": "#c0392b", "佛學": "#f1c40f", "科技": "#16a085", "價值觀教育": "#e91e63", "跨課程": "#7f8c8d" };
 
+        // V2.7 Tag Definitions
+        const tag5C = [
+            {val: "Creativity", label: "創意 (Creativity)"},
+            {val: "Critical Thinking", label: "明辨 (Critical Thinking)"},
+            {val: "Communication", label: "溝通 (Communication)"},
+            {val: "Collaboration", label: "協作 (Collaboration)"},
+            {val: "Contribution", label: "貢獻 (Contribution)"}
+        ];
+        const tagKeywords = ["AI 生成", "評估工具", "課堂管理", "備課輔助", "差異化教學", "學生自學", "專題研習", "遊戲化學習", "行政效率", "其他"];
+
         function initSubjectCheckboxes() {
             const container = document.getElementById('crossSubjectCheckboxes');
             container.innerHTML = '';
             subjectList.forEach(sub => { container.innerHTML += `<label class="checkbox-label"><input type="checkbox" name="crossSub" value="${sub}"> ${sub}</label>`; });
         }
         initSubjectCheckboxes();
+
+        // V2.7 Init Tag Checkboxes
+        function initTagCheckboxes() {
+            const container = document.getElementById('tagsCheckboxContainer');
+            container.innerHTML = `<div class="tag-category-title">🌟 5C+ 核心素養</div>`;
+            tag5C.forEach(t => {
+                container.innerHTML += `<label class="checkbox-label"><input type="checkbox" name="appTag" value="${t.val}"> ${t.label}</label>`;
+            });
+            container.innerHTML += `<div class="tag-category-title">🔑 功能關鍵字</div>`;
+            tagKeywords.forEach(k => {
+                container.innerHTML += `<label class="checkbox-label"><input type="checkbox" name="appTag" value="${k}"> ${k}</label>`;
+            });
+        }
+        initTagCheckboxes();
 
         auth.onAuthStateChanged((user) => {
             if (user) {
@@ -476,7 +503,6 @@
             }
         });
 
-        // --- Bulletproof renderApps (V2.6) ---
         function renderApps(apps) {
             const container = document.getElementById('appsContainer');
             container.innerHTML = '';
@@ -673,18 +699,31 @@
         function handleSubjectChange() { const sub = document.getElementById('appSubject').value; document.getElementById('crossSubjectSection').style.display = sub === '跨課程' ? 'block' : 'none'; }
         function submitComment(appId) { const input = document.getElementById(`comment_input_${appId}`); const text = input.value.trim(); if(!text) return; const newComment = { author: currentUser.name, content: text, timestamp: Date.now() }; db.collection('apps').doc(appId).update({ comments: firebase.firestore.FieldValue.arrayUnion(newComment) }).then(() => loadData()).catch(e => { db.collection('apps').doc(appId).set({ comments: [newComment] }, { merge: true }).then(() => loadData()); }); }
         function submitRating(appId) { const ease = document.getElementById(`ease_${appId}`).value, effect = document.getElementById(`effect_${appId}`).value; const data = {}; data[`ratings.${currentUser.uid}`] = { ease: parseInt(ease), effect: parseInt(effect) }; db.collection('apps').doc(appId).update(data).then(() => { alert("評分成功！"); loadData(); }).catch(e => { db.collection('apps').doc(appId).set({ ratings: { [currentUser.uid]: { ease: parseInt(ease), effect: parseInt(effect) } } }, { merge: true }).then(() => { alert("評分成功！"); loadData(); }); }); }
+        
+        // V2.7 Updated triggerAutoTag to select Checkboxes
         function triggerAutoTag() {
-            const prompt = document.getElementById('appPrompt').value; const title = document.getElementById('appTitle').value; const currentTags = document.getElementById('appTags').value;
-            if(currentTags === '' || currentTags === 'General') {
-                let tags = []; const combined = prompt + title;
-                if(combined.includes("畫") || combined.includes("創")) tags.push("Creativity");
-                if(combined.includes("問") || combined.includes("思")) tags.push("Critical Thinking");
-                if(combined.includes("組") || combined.includes("合")) tags.push("Collaboration");
-                if(combined.includes("說") || combined.includes("話")) tags.push("Communication");
-                if(combined.includes("幫") || combined.includes("享")) tags.push("Contribution");
-                if(tags.length > 0) document.getElementById('appTags').value = tags.join(", ");
-            }
+            const prompt = document.getElementById('appPrompt').value; 
+            const title = document.getElementById('appTitle').value; 
+            const combined = prompt + title;
+            
+            // Only auto-tag if nothing is checked yet? Or append? Let's append if matches found.
+            // Simple keyword matching for 5C
+            if(combined.includes("畫") || combined.includes("創") || combined.includes("Design")) checkTag("Creativity");
+            if(combined.includes("問") || combined.includes("思") || combined.includes("Think")) checkTag("Critical Thinking");
+            if(combined.includes("組") || combined.includes("合") || combined.includes("Group")) checkTag("Collaboration");
+            if(combined.includes("說") || combined.includes("話") || combined.includes("Speak")) checkTag("Communication");
+            if(combined.includes("幫") || combined.includes("享") || combined.includes("Share")) checkTag("Contribution");
+            
+            // Keywords
+            if(combined.includes("AI")) checkTag("AI 生成");
+            if(combined.includes("評估") || combined.includes("測驗")) checkTag("評估工具");
         }
+        
+        function checkTag(val) {
+            const cb = document.querySelector(`input[name="appTag"][value="${val}"]`);
+            if(cb) cb.checked = true;
+        }
+
         function toggleUploadForm() { const type = document.getElementById('uploadType').value; document.getElementById('appForm').style.display = type === 'app' ? 'block' : 'none'; document.getElementById('promptForm').style.display = type === 'prompt' ? 'block' : 'none'; }
         function submitUpload() {
             const isEdit = document.getElementById('editModeId').value !== "";
@@ -693,6 +732,11 @@
             if(collection === 'apps') {
                 let crossSubs = [];
                 if(document.getElementById('appSubject').value === '跨課程') { document.querySelectorAll('input[name="crossSub"]:checked').forEach(cb => { if(cb.value) crossSubs.push(cb.value); }); }
+                
+                // V2.7 Collect Tags from Checkboxes
+                let selectedTags = [];
+                document.querySelectorAll('input[name="appTag"]:checked').forEach(cb => selectedTags.push(cb.value));
+
                 const rType = document.getElementById('resourceType').value;
                 let finalLink = document.getElementById('appLink').value;
                 if(rType === 'image' && document.getElementById('appFileBase64').value) { finalLink = document.getElementById('appFileBase64').value; }
@@ -700,7 +744,7 @@
                     category: document.getElementById('appCategory').value, subject: document.getElementById('appSubject').value, crossSubjects: crossSubs,
                     adminType: document.getElementById('appAdminType').value, resourceType: rType, link: finalLink,
                     painPoint: document.getElementById('appPainPoint').value, promptText: document.getElementById('appPrompt').value,
-                    tags: document.getElementById('appTags').value.split(',').map(s=>s.trim())
+                    tags: selectedTags // Array of strings
                 });
                 if(!isEdit) data.ratings = {}; 
             } else { Object.assign(data, { content: document.getElementById('promptContent').value, purpose: document.getElementById('promptPurpose').value }); }
@@ -719,7 +763,17 @@
             document.getElementById('appAdminType').value = app.adminType || "";
             document.getElementById('resourceType').value = app.resourceType || 'url'; handleResourceTypeChange();
             if(app.resourceType === 'image' && app.link.startsWith('data:')) { document.getElementById('imagePreview').src = app.link; document.getElementById('imagePreviewBox').style.display = 'block'; document.getElementById('appFileBase64').value = app.link; } else { document.getElementById('appLink').value = app.link; }
-            document.getElementById('appPainPoint').value = app.painPoint; document.getElementById('appPrompt').value = app.promptText || ""; document.getElementById('appTags').value = Array.isArray(app.tags) ? app.tags.join(", ") : app.tags;
+            document.getElementById('appPainPoint').value = app.painPoint; document.getElementById('appPrompt').value = app.promptText || ""; 
+            
+            // V2.7 Populate Tag Checkboxes
+            document.querySelectorAll('input[name="appTag"]').forEach(cb => cb.checked = false); // Clear
+            if(app.tags && Array.isArray(app.tags)) {
+                app.tags.forEach(tag => {
+                    const cb = document.querySelector(`input[name="appTag"][value="${tag}"]`);
+                    if(cb) cb.checked = true;
+                });
+            }
+
             const btn = document.getElementById('submitBtn'); btn.innerText = "確認更新"; btn.classList.replace('btn-primary', 'btn-success'); document.getElementById('cancelBtn').style.display = 'block'; document.getElementById('deleteBtn').style.display = 'block'; 
         }
         function editPrompt(p) {
@@ -728,7 +782,10 @@
             const btn = document.getElementById('submitBtn'); btn.innerText = "確認更新"; btn.classList.replace('btn-primary', 'btn-success'); document.getElementById('cancelBtn').style.display = 'block'; document.getElementById('deleteBtn').style.display = 'block';
         }
         function resetForm(shouldRedirect = false) {
-            document.getElementById('editModeId').value = ""; document.querySelectorAll('input, textarea').forEach(i => i.value = ""); document.getElementById('appTags').value = "General";
+            document.getElementById('editModeId').value = ""; document.querySelectorAll('input, textarea').forEach(i => i.value = ""); 
+            // Reset Tags
+            document.querySelectorAll('input[name="appTag"]').forEach(cb => cb.checked = false);
+            
             document.querySelectorAll('input[name="crossSub"]').forEach(cb => cb.checked = false); document.getElementById('crossSubjectSection').style.display = 'none';
             document.getElementById('imagePreviewBox').style.display = 'none'; document.getElementById('appFileBase64').value = ""; document.getElementById('resourceType').value = "url"; handleResourceTypeChange();
             const btn = document.getElementById('submitBtn'); btn.innerText = "確認發布"; btn.classList.replace('btn-success', 'btn-primary'); document.getElementById('cancelBtn').style.display = 'none'; document.getElementById('deleteBtn').style.display = 'none';
