@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Hub | 資源展示庫 V3.1</title>
+    <title>AI Hub | 資源展示庫 V3.2</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -11,7 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     
     <style>
-        /* CSS V3.1 - Keyword Display Fix */
+        /* CSS V3.2 - Admin Tag Lock Fix */
         :root {
             --primary: #2c3e50;
             --accent: #00d2ff;
@@ -149,7 +149,7 @@
         .form-control { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
         .prompt-box { background: #f8f9fa; border-left: 3px solid #f39c12; padding: 10px; font-size: 0.85rem; color: #555; margin-bottom: 10px; white-space: pre-wrap; font-family: monospace; max-height: 80px; overflow-y: auto;}
         
-        .cross-subject-grid, .tags-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef; margin-top: 5px; }
+        .cross-subject-grid, .tags-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef; margin-top: 5px; transition: all 0.3s; }
         .checkbox-label { display: flex; align-items: center; font-size: 0.9rem; cursor: pointer; color: #555; }
         .checkbox-label input { margin-right: 8px; transform: scale(1.1); }
         .tag-category-title { font-size: 0.85rem; color: var(--accent-dark); font-weight: bold; margin-top: 10px; margin-bottom: 5px; width: 100%; grid-column: 1 / -1; border-bottom: 1px solid #e0e0e0; padding-bottom: 5px;}
@@ -182,7 +182,7 @@
 
     <div id="loginModal">
         <div class="login-box">
-            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V3.1</h2>
+            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V3.2</h2>
             <p style="color:#7f8c8d; margin-bottom:20px;">請使用校方派發的帳號登入</p>
             <input type="email" id="loginEmail" class="form-control" placeholder="Email" style="margin-bottom:10px;">
             <input type="password" id="loginPass" class="form-control" placeholder="Password" style="margin-bottom:20px;">
@@ -197,7 +197,7 @@
         <div class="sidebar-header">
             <div class="school-name">香海正覺蓮社<br>佛教正覺蓮社學校</div>
             <h2 class="app-name">BCK-AI Hub</h2>
-            <div class="version-tag">V3.1 Fix</div>
+            <div class="version-tag">V3.2 Fix</div>
         </div>
 
         <div id="menu-dashboard" class="menu-item active" onclick="showPage('dashboard')"><span class="menu-icon">📊</span> 數據總覽</div>
@@ -391,7 +391,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label>5C+ / 關鍵字標籤 (可複選)</label>
+                        <label>5C+ / 關鍵字標籤 (只適用於學教評)</label>
                         <div id="tagsCheckboxContainer" class="tags-grid">
                         </div>
                     </div>
@@ -463,9 +463,8 @@
             {val: "Contribution", label: "貢獻 (Contribution)"}
         ];
         
-        // V3.1: Pre-populate map
         const tagMap = {};
-        const tag5CValues = []; // Helper for quick check
+        const tag5CValues = []; 
         tag5C.forEach(t => { 
             tagMap[t.val] = t.label;
             tag5CValues.push(t.val);
@@ -565,7 +564,6 @@
             container.innerHTML = '';
             apps.forEach(app => {
                 try {
-                    // V3.1 FIX: Separation of 5C and Keywords
                     let tagsHtml = '';
                     if (app.tags && Array.isArray(app.tags) && app.tags.length > 0) {
                         const fiveCTags = [];
@@ -573,24 +571,16 @@
                         
                         app.tags.forEach(t => {
                             if (!t) return;
-                            // Check if it's a 5C value or label key
                             if (tag5CValues.includes(t)) {
                                 fiveCTags.push(tagMap[t]);
                             } else {
-                                // Assume it's a keyword
                                 kwTags.push(t);
                             }
                         });
 
                         let innerHtml = '';
-                        // Render 5C Tags (Green, Robot/Star)
-                        fiveCTags.forEach(label => {
-                            innerHtml += `<span class="tag smart-tag">🌟 ${label}</span>`;
-                        });
-                        // Render Keyword Tags (Gray, Tag Icon)
-                        kwTags.forEach(label => {
-                            innerHtml += `<span class="tag keyword-tag">🏷️ ${label}</span>`;
-                        });
+                        fiveCTags.forEach(label => { innerHtml += `<span class="tag smart-tag">🌟 ${label}</span>`; });
+                        kwTags.forEach(label => { innerHtml += `<span class="tag keyword-tag">🏷️ ${label}</span>`; });
                         
                         tagsHtml = `<div class="tags-container">${innerHtml}</div>`;
                     }
@@ -824,12 +814,40 @@
         }
 
         function filterApps(type) { document.querySelectorAll('.card').forEach(c => { c.style.display = 'none'; const cat=c.getAttribute('data-cat'), sub=c.getAttribute('data-sub'); if(type==='all' || (type==='value'&&sub==='價值觀教育') || cat===type) c.style.display='flex'; }); }
-        function handleCategoryChange() { const cat = document.getElementById('appCategory').value; document.getElementById('appSubject').disabled = cat === 'admin'; document.getElementById('adminTypeGroup').style.display = cat === 'admin' ? 'block' : 'none'; document.getElementById('subjectGroup').style.opacity = cat === 'admin' ? '0.5' : '1'; }
+        
+        // V3.2 Fixed Logic: Lock Tags when Admin is selected
+        function handleCategoryChange() { 
+            const cat = document.getElementById('appCategory').value; 
+            const isAdmin = (cat === 'admin');
+            
+            document.getElementById('appSubject').disabled = isAdmin; 
+            document.getElementById('adminTypeGroup').style.display = isAdmin ? 'block' : 'none'; 
+            document.getElementById('subjectGroup').style.opacity = isAdmin ? '0.5' : '1'; 
+            
+            const tagsContainer = document.getElementById('tagsCheckboxContainer');
+            if (isAdmin) {
+                // Disable and Gray out
+                tagsContainer.style.opacity = '0.4';
+                tagsContainer.style.pointerEvents = 'none';
+                tagsContainer.style.filter = 'grayscale(100%)';
+                // Clear all checked boxes
+                tagsContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            } else {
+                // Enable
+                tagsContainer.style.opacity = '1';
+                tagsContainer.style.pointerEvents = 'auto';
+                tagsContainer.style.filter = 'none';
+            }
+        }
+        
         function handleSubjectChange() { const sub = document.getElementById('appSubject').value; document.getElementById('crossSubjectSection').style.display = sub === '跨課程' ? 'block' : 'none'; }
         function submitComment(appId) { const input = document.getElementById(`comment_input_${appId}`); const text = input.value.trim(); if(!text) return; const newComment = { author: currentUser.name, content: text, timestamp: Date.now() }; db.collection('apps').doc(appId).update({ comments: firebase.firestore.FieldValue.arrayUnion(newComment) }).then(() => loadData()).catch(e => { db.collection('apps').doc(appId).set({ comments: [newComment] }, { merge: true }).then(() => loadData()); }); }
         function submitRating(appId) { const ease = document.getElementById(`ease_${appId}`).value, effect = document.getElementById(`effect_${appId}`).value; const data = {}; data[`ratings.${currentUser.uid}`] = { ease: parseInt(ease), effect: parseInt(effect) }; db.collection('apps').doc(appId).update(data).then(() => { alert("評分成功！"); loadData(); }).catch(e => { db.collection('apps').doc(appId).set({ ratings: { [currentUser.uid]: { ease: parseInt(ease), effect: parseInt(effect) } } }, { merge: true }).then(() => { alert("評分成功！"); loadData(); }); }); }
         
         function triggerAutoTag() {
+            // If admin, do not trigger auto tag
+            if (document.getElementById('appCategory').value === 'admin') return;
+
             const prompt = document.getElementById('appPrompt').value; 
             const title = document.getElementById('appTitle').value; 
             const combined = prompt + title;
@@ -860,7 +878,10 @@
                 if(document.getElementById('appSubject').value === '跨課程') { document.querySelectorAll('input[name="crossSub"]:checked').forEach(cb => { if(cb.value) crossSubs.push(cb.value); }); }
                 
                 let selectedTags = [];
-                document.querySelectorAll('input[name="appTag"]:checked').forEach(cb => selectedTags.push(cb.value));
+                // Only collect tags if not admin (double check)
+                if (document.getElementById('appCategory').value !== 'admin') {
+                    document.querySelectorAll('input[name="appTag"]:checked').forEach(cb => selectedTags.push(cb.value));
+                }
 
                 const rType = document.getElementById('resourceType').value;
                 let finalLink = document.getElementById('appLink').value;
@@ -886,7 +907,11 @@
         
         function editApp(app) {
             showPage('upload'); document.getElementById('editModeId').value = app.id; document.getElementById('uploadType').value = 'app'; toggleUploadForm();
-            document.getElementById('appTitle').value = app.title; document.getElementById('appCategory').value = app.category; handleCategoryChange();
+            document.getElementById('appTitle').value = app.title; document.getElementById('appCategory').value = app.category; 
+            
+            // Run this to set UI state (Admin locked tags vs Teaching unlocked)
+            handleCategoryChange();
+
             document.getElementById('appSubject').value = app.subject || ""; handleSubjectChange(); 
             
             document.querySelectorAll('input[name="crossSub"]').forEach(cb => cb.checked = false);
@@ -905,8 +930,10 @@
             
             document.getElementById('appRemarks').value = app.remarks || "";
 
+            // Reset tags first
             document.querySelectorAll('input[name="appTag"]').forEach(cb => cb.checked = false); 
-            if(app.tags && Array.isArray(app.tags)) {
+            // Only populate tags if it's teaching (though admin shouldn't have them, this is a safeguard)
+            if(app.category !== 'admin' && app.tags && Array.isArray(app.tags)) {
                 app.tags.forEach(tag => {
                     const cb = document.querySelector(`input[name="appTag"][value="${tag}"]`);
                     if(cb) cb.checked = true;
@@ -925,6 +952,9 @@
         function resetForm(shouldRedirect = false) {
             document.getElementById('editModeId').value = ""; document.querySelectorAll('input, textarea').forEach(i => i.value = ""); 
             
+            document.getElementById('appCategory').value = 'teaching'; // Default back to teaching
+            handleCategoryChange(); // Reset UI state
+
             document.querySelectorAll('input[name="appTag"]').forEach(cb => cb.checked = false);
             document.querySelectorAll('input[name="crossSub"]').forEach(cb => cb.checked = false); document.getElementById('crossSubjectSection').style.display = 'none';
             document.getElementById('imagePreviewBox').style.display = 'none'; document.getElementById('appFileBase64').value = ""; document.getElementById('resourceType').value = "url"; handleResourceTypeChange();
