@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Hub | 資源展示庫 V2.9</title>
+    <title>AI Hub | 資源展示庫 V3.0</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -11,13 +11,13 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     
     <style>
-        /* CSS V2.9 Gradient Update */
+        /* CSS V3.0 - Menu & Tag Fixes */
         :root {
             --primary: #2c3e50;
-            --accent: #00d2ff; /* Brighter Cyan for gradient */
+            --accent: #00d2ff;
             --accent-dark: #3a7bd5;
             --light: #ecf0f1;
-            --success: #00b09b; /* Gradient Green */
+            --success: #00b09b;
             --warning: #f39c12;
             --danger: #e74c3c;
             --admin-color: #8e44ad;
@@ -29,10 +29,9 @@
         }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f4f7f6; display: flex; height: 100vh; overflow-x: hidden; }
         
-        /* Gradient Sidebar V2.9 */
+        /* Gradient Sidebar */
         .sidebar { 
             width: 260px; 
-            /* Modern Gradient: "Midnight City" */
             background: linear-gradient(135deg, #141e30 0%, #243b55 100%);
             color: white; 
             display: flex; 
@@ -78,14 +77,18 @@
         .app-name { font-size: 1.4rem; margin: 0; font-weight: bold; background: -webkit-linear-gradient(#00d2ff, #3a7bd5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .version-tag { font-size: 0.7rem; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 10px; margin-top: 5px; display: inline-block; color: #bdc3c7; }
 
-        /* Menu Item Hover Effect V2.9 */
+        /* Menu Item Logic Fixed */
         .menu-item { padding: 12px 15px; cursor: pointer; border-radius: 8px; margin-bottom: 5px; transition: 0.2s; display: flex; align-items: center; border: 1px solid transparent; }
-        .menu-item:hover, .menu-item.active { 
+        .menu-item:hover { background: rgba(255,255,255,0.1); transform: translateX(5px); }
+        
+        /* Active State style */
+        .menu-item.active { 
             background: rgba(255,255,255,0.15); 
             border-left: 4px solid var(--accent);
             transform: translateX(5px);
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
+
         .menu-icon { margin-right: 10px; width: 20px; text-align: center; }
         .user-info { margin-top: auto; padding-top:20px; border-top:1px solid rgba(255,255,255,0.2); font-size: 0.9rem; }
         
@@ -185,7 +188,7 @@
 
     <div id="loginModal">
         <div class="login-box">
-            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V2.9</h2>
+            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V3.0</h2>
             <p style="color:#7f8c8d; margin-bottom:20px;">請使用校方派發的帳號登入</p>
             <input type="email" id="loginEmail" class="form-control" placeholder="Email" style="margin-bottom:10px;">
             <input type="password" id="loginPass" class="form-control" placeholder="Password" style="margin-bottom:20px;">
@@ -200,13 +203,13 @@
         <div class="sidebar-header">
             <div class="school-name">香海正覺蓮社<br>佛教正覺蓮社學校</div>
             <h2 class="app-name">BCK-AI Hub</h2>
-            <div class="version-tag">V2.9 Gradient</div>
+            <div class="version-tag">V3.0 Fix</div>
         </div>
 
-        <div class="menu-item active" onclick="showPage('dashboard')"><span class="menu-icon">📊</span> 數據總覽</div>
-        <div class="menu-item" onclick="showPage('apps')"><span class="menu-icon">📱</span> 資源展示庫</div>
-        <div class="menu-item" onclick="showPage('prompts')"><span class="menu-icon">💡</span> 好Prompt 分享</div>
-        <div class="menu-item" onclick="showPage('upload')"><span class="menu-icon">📤</span> 上載分享</div>
+        <div id="menu-dashboard" class="menu-item active" onclick="showPage('dashboard')"><span class="menu-icon">📊</span> 數據總覽</div>
+        <div id="menu-apps" class="menu-item" onclick="showPage('apps')"><span class="menu-icon">📱</span> 資源展示庫</div>
+        <div id="menu-prompts" class="menu-item" onclick="showPage('prompts')"><span class="menu-icon">💡</span> 好Prompt 分享</div>
+        <div id="menu-upload" class="menu-item" onclick="showPage('upload')"><span class="menu-icon">📤</span> 上載分享</div>
         <div class="user-info">
             <p>👋 <span id="currentUserDisplay">...</span> 老師</p>
             <button class="btn btn-outline" style="width:100%; font-size:0.8rem; background:transparent; color:white; border:1px solid rgba(255,255,255,0.3);" onclick="logout()">登出</button>
@@ -466,7 +469,7 @@
             {val: "Contribution", label: "貢獻 (Contribution)"}
         ];
         
-        // V2.9 Tag Map for Display (Solves "Only Emoji" bug)
+        // V3.0 FIX: Pre-populate map AND safe lookup logic
         const tagMap = {};
         tag5C.forEach(t => tagMap[t.val] = t.label);
 
@@ -564,10 +567,13 @@
             container.innerHTML = '';
             apps.forEach(app => {
                 try {
-                    // V2.9 Fix: Use tagMap to display label if available, otherwise show value
-                    const tagsHtml = Array.isArray(app.tags) 
+                    // V3.0 FIX: Better tag rendering to prevent "Empty Text"
+                    const tagsHtml = (app.tags && Array.isArray(app.tags) && app.tags.length > 0) 
                         ? `<div class="tags-container">${app.tags.map(t => {
-                            const label = tagMap[t] || t; // Translate "Creativity" to "創意 (Creativity)"
+                            if (!t) return '';
+                            // Try map, if fails use original text. Ensure not empty.
+                            let label = tagMap[t] || t;
+                            if (!label || label.trim() === "") label = t; // Fallback
                             return `<span class="tag smart-tag">🤖 ${label}</span>`;
                         }).join('')}</div>`
                         : '';
@@ -788,13 +794,26 @@
             });
         }
 
+        // V3.0 FIX: Updated Menu Active Logic
         function showPage(pageId) { 
+            // 1. Hide all pages
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); 
+            
+            // 2. Show selected page
             document.getElementById(pageId).classList.add('active'); 
+
+            // 3. Update Menu Active State
+            document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+            const activeMenuId = 'menu-' + pageId;
+            const activeItem = document.getElementById(activeMenuId);
+            if(activeItem) activeItem.classList.add('active');
+
+            // 4. Mobile sidebar toggle
             if(window.innerWidth<=768 && document.querySelector('.sidebar').classList.contains('active')) {
                 toggleSidebar();
             }
         }
+
         function filterApps(type) { document.querySelectorAll('.card').forEach(c => { c.style.display = 'none'; const cat=c.getAttribute('data-cat'), sub=c.getAttribute('data-sub'); if(type==='all' || (type==='value'&&sub==='價值觀教育') || cat===type) c.style.display='flex'; }); }
         function handleCategoryChange() { const cat = document.getElementById('appCategory').value; document.getElementById('appSubject').disabled = cat === 'admin'; document.getElementById('adminTypeGroup').style.display = cat === 'admin' ? 'block' : 'none'; document.getElementById('subjectGroup').style.opacity = cat === 'admin' ? '0.5' : '1'; }
         function handleSubjectChange() { const sub = document.getElementById('appSubject').value; document.getElementById('crossSubjectSection').style.display = sub === '跨課程' ? 'block' : 'none'; }
@@ -861,13 +880,10 @@
             document.getElementById('appTitle').value = app.title; document.getElementById('appCategory').value = app.category; handleCategoryChange();
             document.getElementById('appSubject').value = app.subject || ""; handleSubjectChange(); 
             
-            // V2.9 Fix: Robustly reset and re-check cross-subjects
             document.querySelectorAll('input[name="crossSub"]').forEach(cb => cb.checked = false);
             if (app.subject === '跨課程' && app.crossSubjects && Array.isArray(app.crossSubjects)) {
-                // Ensure section is visible first
                 document.getElementById('crossSubjectSection').style.display = 'block';
                 app.crossSubjects.forEach(sub => {
-                    // Trim matches to avoid whitespace issues
                     const cb = document.querySelector(`input[name="crossSub"][value="${sub.trim()}"]`);
                     if(cb) cb.checked = true;
                 });
