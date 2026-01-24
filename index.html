@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BCK-AI Hub | 正覺蓮社 AI 智慧庫 V1.9</title>
+    <title>BCK-AI Hub | 正覺蓮社 AI 智慧庫 V2.1</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -11,7 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     
     <style>
-        /* CSS V1.9 Update */
+        /* CSS V2.1 */
         :root {
             --primary: #2c3e50;
             --accent: #3498db;
@@ -33,6 +33,7 @@
         .menu-item:hover, .menu-item.active { background-color: var(--accent); transform: translateX(5px); }
         .menu-icon { margin-right: 10px; width: 20px; text-align: center; }
         .user-info { margin-top: auto; padding-top:20px; border-top:1px solid #546e7a; font-size: 0.9rem; }
+        
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
         .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; border-bottom: 4px solid var(--accent); }
         .stat-number { font-size: 2.5rem; font-weight: 800; color: var(--primary); margin: 10px 0; }
@@ -48,6 +49,7 @@
         .app-preview { width: 100%; height: 180px; object-fit: contain; background-color: #e0e0e0; border-bottom: 1px solid #ddd; display: block; }
         .app-preview-placeholder { height: 180px; background: linear-gradient(135deg, #e0e0e0, #f5f5f5); display: flex; align-items: center; justify-content: center; color: #aaa; font-size: 2rem; }
 
+        /* Dynamic Border Colors based on category will be handled inline or via JS classes if complex */
         .card.teaching { border-top: 5px solid var(--accent); }
         .card.admin { border-top: 5px solid var(--admin-color); }
         .card.value-edu { border-top: 5px solid var(--value-edu-color); }
@@ -59,12 +61,10 @@
         .rate-label { font-size: 0.7rem; text-transform: uppercase; opacity: 0.9; }
         .rate-score { font-size: 1.2rem; }
         
-        /* 評分表單樣式 */
         .rating-form { margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee; font-size: 0.9rem; background: #fafafa; padding: 10px; border-radius: 5px;}
         .rating-input-row { display: flex; gap: 10px; align-items: center; margin-bottom: 5px; }
         .rating-select { padding: 2px; border-radius: 4px; border: 1px solid #ccc; font-size: 0.8rem; }
         
-        /* V1.9 評論區樣式 */
         .comments-section { margin-top: 15px; border-top: 2px dashed #f0f0f0; padding-top: 15px; }
         .comments-title { font-size: 0.85rem; font-weight: bold; color: #7f8c8d; margin-bottom: 8px; }
         .comment-list { max-height: 120px; overflow-y: auto; font-size: 0.85rem; margin-bottom: 10px; padding-right: 5px; }
@@ -112,7 +112,7 @@
 
     <div id="loginModal">
         <div class="login-box">
-            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V1.9</h2>
+            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V2.1</h2>
             <p style="color:#7f8c8d; margin-bottom:20px;">請使用校方派發的帳號登入</p>
             <input type="email" id="loginEmail" class="form-control" placeholder="Email" style="margin-bottom:10px;">
             <input type="password" id="loginPass" class="form-control" placeholder="Password" style="margin-bottom:20px;">
@@ -310,7 +310,7 @@
 
     <script>
         // ==========================================
-        // CONFIGURATION ZONE V1.9
+        // CONFIGURATION ZONE V2.1
         // ==========================================
         const firebaseConfig = {
           apiKey: "AIzaSyBPRN5_vnvMOPAR0fTVaZoqM57ffIGZOQU",
@@ -356,6 +356,34 @@
         };
 
         const subjectList = ["中文", "英文", "數學", "常識/科學", "人文", "視藝", "音樂", "體育", "圖書", "普通話", "佛學", "科技", "價值觀教育"];
+
+        // Color Palettes V2.1
+        const adminColors = {
+            "校務運作": "#3498db", // Blue
+            "文書處理": "#9b59b6", // Purple
+            "數據分析": "#2ecc71", // Green
+            "資訊通訊": "#e67e22", // Orange
+            "活動策劃": "#e74c3c", // Red
+            "資源管理": "#f1c40f", // Yellow
+            "未分類": "#95a5a6"
+        };
+
+        const subjectColors = {
+            "中文": "#e74c3c", // Red
+            "英文": "#3498db", // Blue
+            "數學": "#f39c12", // Orange
+            "常識/科學": "#27ae60", // Green
+            "人文": "#8e44ad", // Purple
+            "視藝": "#e91e63", // Pink
+            "音樂": "#1abc9c", // Teal
+            "體育": "#34495e", // Dark Blue
+            "圖書": "#d35400", // Pumpkin
+            "普通話": "#c0392b", // Dark Red
+            "佛學": "#f1c40f", // Yellow
+            "科技": "#16a085", // Sea Green
+            "價值觀教育": "#e91e63", // Pink
+            "跨課程": "#7f8c8d" // Grey
+        };
 
         function initSubjectCheckboxes() {
             const container = document.getElementById('crossSubjectCheckboxes');
@@ -421,26 +449,14 @@
                 });
         }
 
-        // V1.9 Comment Submission
         function submitComment(appId) {
             const input = document.getElementById(`comment_input_${appId}`);
             const text = input.value.trim();
             if(!text) return;
-            
-            const newComment = {
-                author: currentUser.name,
-                content: text,
-                timestamp: Date.now()
-            };
-
-            db.collection('apps').doc(appId).update({
-                comments: firebase.firestore.FieldValue.arrayUnion(newComment)
-            }).then(() => {
-                // alert("留言成功！"); // Optional: less intrusion
-                loadData();
-            }).catch(e => {
-                 db.collection('apps').doc(appId).set({ comments: [newComment] }, { merge: true }).then(() => loadData());
-            });
+            const newComment = { author: currentUser.name, content: text, timestamp: Date.now() };
+            db.collection('apps').doc(appId).update({ comments: firebase.firestore.FieldValue.arrayUnion(newComment) })
+            .then(() => loadData())
+            .catch(e => { db.collection('apps').doc(appId).set({ comments: [newComment] }, { merge: true }).then(() => loadData()); });
         }
 
         function renderApps(apps) {
@@ -451,18 +467,25 @@
                 
                 let catBadge = '';
                 let cardClass = app.category;
+                
                 if (app.category === 'teaching') {
                     if (app.subject === '跨課程') {
-                        const crossSubs = (app.crossSubjects || []).join(' + ');
-                        catBadge = `<span class="tag" style="background:var(--accent); color:white">跨課程: ${crossSubs}</span>`;
+                        // V2.1 Fix: Ensure only valid cross subjects are displayed
+                        const validCrossSubs = (app.crossSubjects || []).filter(s => s && s.trim() !== "");
+                        const crossText = validCrossSubs.length > 0 ? validCrossSubs.join(' + ') : '綜合';
+                        catBadge = `<span class="tag" style="background:#7f8c8d; color:white">跨課程: ${crossText}</span>`;
                     } else if (app.subject === '價值觀教育') {
                         catBadge = `<span class="tag" style="background:var(--value-edu-color); color:white">💗 ${app.subject}</span>`;
                         cardClass = 'value-edu';
                     } else {
-                        catBadge = `<span class="tag" style="background:var(--accent); color:white">學教評: ${app.subject}</span>`;
+                        // V2.1: Use subjectColors
+                        const color = subjectColors[app.subject] || 'var(--accent)';
+                        catBadge = `<span class="tag" style="background:${color}; color:white">學教評: ${app.subject}</span>`;
                     }
                 } else {
-                    catBadge = `<span class="tag" style="background:var(--admin-color); color:white">行政: ${app.adminType}</span>`;
+                    // V2.1: Use adminColors
+                    const color = adminColors[app.adminType] || 'var(--admin-color)';
+                    catBadge = `<span class="tag" style="background:${color}; color:white">行政: ${app.adminType}</span>`;
                 }
                 
                 const isAuthor = (app.author === currentUser.name) || (app.authorEmail && app.authorEmail === currentUser.email);
@@ -473,7 +496,6 @@
                     imgHtml = `<img src="https://image.thum.io/get/width/600/allowJPG/${app.link}" class="app-preview" onerror="this.style.display='none'">`;
                 }
 
-                // Ratings
                 const ratings = app.ratings || {};
                 const ratingValues = Object.values(ratings);
                 let avgEase = "-", avgEffect = "-";
@@ -489,7 +511,6 @@
                     ? `<div style="margin-top:5px; color:var(--success); font-size:0.85rem;">✅ 你已評價 (易: ${hasRated.ease}, 效: ${hasRated.effect})</div>`
                     : `<div class="rating-form"><div class="rating-input-row"><label>易用:</label><select id="ease_${app.id}" class="rating-select"><option value="5">5</option><option value="4">4</option><option value="3">3</option><option value="2">2</option><option value="1">1</option></select><label>成效:</label><select id="effect_${app.id}" class="rating-select"><option value="5">5</option><option value="4">4</option><option value="3">3</option><option value="2">2</option><option value="1">1</option></select><button class="btn btn-primary btn-xs" onclick="submitRating('${app.id}')">評分</button></div></div>`;
 
-                // Comments V1.9
                 let commentsHtml = '';
                 if(app.comments && app.comments.length > 0) {
                     app.comments.forEach(c => {
@@ -524,7 +545,6 @@
                                     <button class="btn btn-primary btn-xs" onclick="submitComment('${app.id}')">送出</button>
                                 </div>
                             </div>
-
                             <a href="${app.link}" target="_blank" class="btn btn-primary" style="display:block; text-align:center; margin-top:10px;">前往工具</a>
                         </div>
                     </div>
@@ -543,7 +563,7 @@
             const authors = new Set([...apps.map(a=>a.author), ...prompts.map(p=>p.author)]);
             document.getElementById('activeTeachers').innerText = authors.size;
 
-            // Teaching Radar
+            // 1. Teaching Radar
             const skillCounts = { "Communication":0, "Contribution":0, "Creativity":0, "Critical Thinking":0, "Collaboration":0 };
             teachingApps.forEach(a => { if(a.tags) a.tags.forEach(t => { if(skillCounts[t] !== undefined) skillCounts[t]++; }); });
             const ctx1 = document.getElementById('teachingChart').getContext('2d');
@@ -557,24 +577,26 @@
                 options: { scales: { r: { beginAtZero: true, suggestMax: 5 } } }
             });
 
-            // Subject Pie
+            // 2. Subject Pie - V2.1 Consistent Colors
             const subjectCounts = {};
             teachingApps.forEach(a => { const subj = a.subject || "未分類"; subjectCounts[subj] = (subjectCounts[subj] || 0) + 1; });
+            const subLabels = Object.keys(subjectCounts);
+            const subBgColors = subLabels.map(l => subjectColors[l] || "#95a5a6");
+
             const ctxSub = document.getElementById('subjectChart').getContext('2d');
             if(subjectChartRef) subjectChartRef.destroy();
             subjectChartRef = new Chart(ctxSub, {
                 type: 'pie',
                 data: {
-                    labels: Object.keys(subjectCounts),
-                    datasets: [{ data: Object.values(subjectCounts), backgroundColor: ['#e74c3c', '#3498db', '#f1c40f', '#2ecc71', '#9b59b6', '#e67e22', '#1abc9c', '#e91e63'] }]
+                    labels: subLabels,
+                    datasets: [{ data: Object.values(subjectCounts), backgroundColor: subBgColors }]
                 }
             });
 
-            // Admin Bar
+            // 3. Admin Bar - V2.1 Consistent Colors
             const adminCounts = {};
             adminApps.forEach(a => { const type = a.adminType || "未分類"; adminCounts[type] = (adminCounts[type] || 0) + 1; });
-            const categoryColors = { "校務運作": "#3498db", "文書處理": "#9b59b6", "數據分析": "#2ecc71", "資訊通訊": "#e67e22", "活動策劃": "#e74c3c", "資源管理": "#f1c40f", "未分類": "#95a5a6" };
-            const bgColors = Object.keys(adminCounts).map(type => categoryColors[type] || "#34495e");
+            const bgColors = Object.keys(adminCounts).map(type => adminColors[type] || "#34495e");
             const ctx2 = document.getElementById('adminChart').getContext('2d');
             if(adminChartRef) adminChartRef.destroy();
             adminChartRef = new Chart(ctx2, {
@@ -583,11 +605,16 @@
                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, plugins: { legend: { display: false } } }
             });
 
-            // Leaderboard
+            // 4. Leaderboard - V2.1 Include ALL Teachers
             const authorStats = {};
+            // Init with all teachers from directory
+            Object.values(teacherDirectory).forEach(name => {
+                authorStats[name] = { count: 0, totalScore: 0, maxScore: 0, bestItem: null };
+            });
+
             [...apps, ...prompts].forEach(item => {
                 const author = item.author;
-                if(!authorStats[author]) authorStats[author] = { count: 0, totalScore: 0, maxScore: 0, bestItem: null };
+                if(!authorStats[author]) authorStats[author] = { count: 0, totalScore: 0, maxScore: 0, bestItem: null }; // Fallback for unknown authors
                 
                 let itemAvg = 0;
                 if (item.ratings) {
@@ -605,22 +632,32 @@
                 if(!s.bestItem) s.bestItem = item; 
             });
             
-            const sortedAuthors = Object.keys(authorStats).sort((a,b) => authorStats[b].count - authorStats[a].count).slice(0, 5);
+            // Sort by count desc, then maxScore desc
+            const sortedAuthors = Object.keys(authorStats).sort((a,b) => {
+                if(authorStats[b].count !== authorStats[a].count) return authorStats[b].count - authorStats[a].count;
+                return authorStats[b].maxScore - authorStats[a].maxScore;
+            });
+
             const lb = document.getElementById('leaderboardList');
             lb.innerHTML = '';
+            
+            // Display all (scrollable container handled by CSS max-height logic if needed, currently list is just appended)
+            // Or limit to top 10? Requirement says "should default have all participating codes". 
+            // We will list all, user can scroll page.
             sortedAuthors.forEach((name, index) => {
                 const stat = authorStats[name];
-                const bestTitle = stat.bestItem ? (stat.bestItem.title.length > 8 ? stat.bestItem.title.substring(0,8)+"..." : stat.bestItem.title) : "N/A";
-                const linkAction = stat.bestItem && stat.bestItem.link ? `href="${stat.bestItem.link}" target="_blank"` : `href="#"`;
+                const bestTitle = stat.bestItem ? (stat.bestItem.title.length > 8 ? stat.bestItem.title.substring(0,8)+"..." : stat.bestItem.title) : "尚無作品";
+                const linkAction = stat.bestItem && stat.bestItem.link ? `href="${stat.bestItem.link}" target="_blank"` : `href="#" style="pointer-events:none; color:#ccc; border-color:#ccc"`;
                 const maxScoreDisp = stat.maxScore > 0 ? stat.maxScore.toFixed(1) : "-";
+                const countClass = stat.count > 0 ? "lb-highlight" : "lb-highlight-dim";
 
                 lb.innerHTML += `
                     <div class="leaderboard-item">
                         <div class="lb-rank">#${index+1}</div>
                         <div class="lb-name">${name}</div>
                         <div class="lb-stats">
-                            <div><span class="lb-highlight">${stat.count}</span> 貢獻</div>
-                            <div style="font-size:0.75rem;">最高分作品: ★${maxScoreDisp} <a ${linkAction} class="lb-link">GO: ${bestTitle}</a></div>
+                            <div><span class="${countClass}" style="${stat.count===0?'color:#ccc':''}">${stat.count}</span> 貢獻</div>
+                            <div style="font-size:0.75rem;">最高分: ★${maxScoreDisp} <a ${linkAction} class="lb-link">GO: ${bestTitle}</a></div>
                         </div>
                     </div>`;
             });
@@ -720,7 +757,10 @@
             if(collection === 'apps') {
                 let crossSubs = [];
                 if(document.getElementById('appSubject').value === '跨課程') {
-                    document.querySelectorAll('input[name="crossSub"]:checked').forEach(cb => crossSubs.push(cb.value));
+                    // V2.1 Fix: Ensure only valid values are pushed
+                    document.querySelectorAll('input[name="crossSub"]:checked').forEach(cb => {
+                        if(cb.value) crossSubs.push(cb.value);
+                    });
                 }
                 Object.assign(data, {
                     category: document.getElementById('appCategory').value,
@@ -767,6 +807,7 @@
             handleCategoryChange();
             document.getElementById('appSubject').value = app.subject || "";
             handleSubjectChange(); 
+            // V2.1 Fix: Correctly check boxes on edit
             if (app.subject === '跨課程' && app.crossSubjects) {
                 app.crossSubjects.forEach(sub => {
                     const cb = document.querySelector(`input[name="crossSub"][value="${sub}"]`);
