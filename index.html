@@ -273,16 +273,54 @@
         let teachingChartRef = null;
         let adminChartRef = null;
 
-        // --- Auth Functions ---
+        // ==========================================
+        //  名冊對照表 (請在此輸入 22 位老師的資料)
+        // ==========================================
+        const teacherDirectory = {
+            // "Email全名": "顯示名稱/代號"
+            "lwysams@bcklas.edu.hk": "穎",
+            "slssams@bcklas.edu.hk": "珊",
+            "ckysams@bcklas.edu.hk": "徐",
+            "cymsams@bcklas.edu.hk": "文",
+            "lysams@bcklas.edu.hk": "燕",
+            "hhysams@bcklas.edu.hk": "侯",
+            "scysams@bcklas.edu.hk": "蘇",
+            "ccwsams@bcklas.edu.hk": "瑋",
+            "ynysams@bcklas.edu.hk": "楊",
+            "csysams@bcklas.edu.hk": "淑",
+            "dspsams@bcklas.edu.hk": "丁",
+            "cherry@bcklas.edu.hk": "Cherry",
+            "lslsams@bcklas.edu.hk": "鈴",
+            "cpy2sams@bcklas.edu.hk": "容",
+            "lsysams@bcklas.edu.hk": "呂",
+            "twksams@bcklas.edu.hk": "慧",
+            "wpwsams@bcklas.edu.hk": "榮",
+            "skysams@bcklas.edu.hk": "兒",
+            "cym2sams@bcklas.edu.hk": "綺",
+            "swysams@bcklas.edu.hk": "沈",
+            "whwsams@bcklas.edu.hk": "馨",
+            "ywysams@bcklas.edu.hk": "俞",
+            // ... 請依照此格式繼續加入其他老師
+            // "test@bcklas.edu.hk": "測試員", 
+        };
+
+        // --- Auth Functions (已修改以支援對照表) ---
         auth.onAuthStateChanged((user) => {
             if (user) {
-                // 如果沒有 display name，預設用 email 前綴 (e.g., "michael" from "michael@bck.edu.hk")
-                const displayName = user.displayName || user.email.split('@')[0];
+                // 1. 先嘗試從對照表找名字
+                let finalName = teacherDirectory[user.email];
+                
+                // 2. 如果對照表沒填，就自動抓 @ 前面的字 (例如 chan)
+                if (!finalName) {
+                    finalName = user.email.split('@')[0];
+                }
+
                 currentUser = { 
-                    name: displayName, 
+                    name: finalName, 
                     email: user.email,
                     uid: user.uid
                 };
+                
                 document.getElementById('loginModal').style.display = 'none';
                 updateUserDisplay();
                 loadData();
