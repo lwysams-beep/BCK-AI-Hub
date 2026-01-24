@@ -201,10 +201,12 @@
                         <div class="form-group" id="adminTypeGroup" style="display:none;">
                             <label>行政類別</label>
                             <select id="appAdminType" class="form-control">
-                                <option value="文書處理">文書處理</option>
-                                <option value="數據分析">數據分析</option>
-                                <option value="活動策劃">活動策劃</option>
-                                <option value="資源管理">資源管理</option>
+                                <option value="校務運作">校務運作 (日常流程、放學、點名)</option>
+                                <option value="文書處理">文書處理 (報告、會議記錄)</option>
+                                <option value="數據分析">數據分析 (成績、問卷統計)</option>
+                                <option value="資訊通訊">資訊通訊 (通告、宣傳、聯絡)</option>
+                                <option value="活動策劃">活動策劃 (旅行、比賽籌備)</option>
+                                <option value="資源管理">資源管理 (物資、場地)</option>
                             </select>
                         </div>
                     </div>
@@ -476,14 +478,37 @@
                 options: { scales: { r: { beginAtZero: true, suggestMax: 5 } } }
             });
 
-            // Admin Chart
-            const adminTypes = { "文書處理":0, "數據分析":0, "活動策劃":0, "資源管理":0 };
-            adminApps.forEach(a => { if(a.adminType) adminTypes[a.adminType] = (adminTypes[a.adminType] || 0) + 1; });
+            // --- Admin Chart (動態版) ---
+            // 自動統計所有出現過的行政分類，不再寫死
+            const adminCounts = {};
+            adminApps.forEach(a => {
+                // 如果沒有分類，歸類為 "未分類"
+                const type = a.adminType || "未分類";
+                adminCounts[type] = (adminCounts[type] || 0) + 1;
+            });
+
             const ctx2 = document.getElementById('adminChart').getContext('2d');
             if(adminChartRef) adminChartRef.destroy();
             adminChartRef = new Chart(ctx2, {
                 type: 'bar',
-                data: { labels: Object.keys(adminTypes), datasets: [{ label: '工具分類', data: Object.values(adminTypes), backgroundColor: ['#8e44ad', '#9b59b6', '#af7ac5', '#c39bd3'] }] }
+                data: {
+                    labels: Object.keys(adminCounts), // 自動抓取分類名稱
+                    datasets: [{
+                        label: '行政工具分類',
+                        data: Object.values(adminCounts), // 自動抓取數量
+                        backgroundColor: [
+                            '#8e44ad', '#9b59b6', '#af7ac5', '#c39bd3', 
+                            '#e8daef', '#76448a', '#6c3483' 
+                        ], // 預備多幾種紫色
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+                    }
+                }
             });
             
             // Leaderboard
