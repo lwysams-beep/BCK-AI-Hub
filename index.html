@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Hub | 資源展示庫 V2.8</title>
+    <title>AI Hub | 資源展示庫 V2.9</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -11,12 +11,13 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     
     <style>
-        /* CSS V2.8 */
+        /* CSS V2.9 Gradient Update */
         :root {
             --primary: #2c3e50;
-            --accent: #3498db;
+            --accent: #00d2ff; /* Brighter Cyan for gradient */
+            --accent-dark: #3a7bd5;
             --light: #ecf0f1;
-            --success: #27ae60;
+            --success: #00b09b; /* Gradient Green */
             --warning: #f39c12;
             --danger: #e74c3c;
             --admin-color: #8e44ad;
@@ -24,29 +25,27 @@
             --gold: #f1c40f;
             --silver: #95a5a6;
             --bronze: #cd7f32;
-            --all-btn-color: #5d6d7e; /* New color for 'All' button */
+            --all-btn-color: #5d6d7e;
         }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f4f7f6; display: flex; height: 100vh; overflow-x: hidden; }
         
-        /* Sidebar Logic V2.8 - Collapsible on Desktop */
+        /* Gradient Sidebar V2.9 */
         .sidebar { 
             width: 260px; 
-            background-color: var(--primary); 
+            /* Modern Gradient: "Midnight City" */
+            background: linear-gradient(135deg, #141e30 0%, #243b55 100%);
             color: white; 
             display: flex; 
             flex-direction: column; 
             padding: 20px; 
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1); 
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1); 
             transition: all 0.3s ease-in-out; 
             z-index: 1001; 
             flex-shrink: 0;
-            white-space: nowrap; /* Prevent text wrapping when shrinking */
+            white-space: nowrap;
         }
 
-        /* Desktop Collapsed State */
-        body.desktop-collapsed .sidebar {
-            margin-left: -300px; /* Hide completely to the left */
-        }
+        body.desktop-collapsed .sidebar { margin-left: -300px; }
         
         .main-content { flex: 1; padding: 30px; overflow-y: auto; position: relative; width: 100%; transition: margin 0.3s; }
         
@@ -54,27 +53,19 @@
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        /* Header & Toggle Button */
         .header-bar { display: flex; align-items: center; margin-bottom: 20px; }
         .menu-toggle-btn { 
-            background: none; 
-            border: none; 
-            font-size: 1.5rem; 
-            cursor: pointer; 
-            color: var(--primary); 
-            padding: 5px 15px 5px 0; 
-            outline: none;
+            background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--primary); padding: 5px 15px 5px 0; outline: none;
         }
         .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
 
         .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
         
-        /* Mobile Specifics */
         @media (max-width: 768px) {
             body { flex-direction: column; }
             .sidebar { position: fixed; top: 0; left: 0; height: 100%; transform: translateX(-100%); width: 260px; }
             .sidebar.active { transform: translateX(0); }
-            body.desktop-collapsed .sidebar { margin-left: 0; } /* Reset desktop margin logic on mobile */
+            body.desktop-collapsed .sidebar { margin-left: 0; }
             .sidebar-overlay.active { display: block; }
             .main-content { padding: 15px; }
             .charts-row { grid-template-columns: 1fr !important; display: flex; flex-direction: column; }
@@ -82,25 +73,31 @@
             .resource-grid { grid-template-columns: 1fr; }
         }
 
-        .sidebar-header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #546e7a; padding-bottom: 15px; }
-        .school-name { font-size: 0.85rem; opacity: 0.9; letter-spacing: 0.5px; margin-bottom: 5px; line-height: 1.4; font-weight: 500;}
-        .app-name { font-size: 1.4rem; margin: 0; font-weight: bold; }
+        .sidebar-header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 15px; }
+        .school-name { font-size: 0.85rem; opacity: 0.8; letter-spacing: 0.5px; margin-bottom: 5px; line-height: 1.4; font-weight: 500;}
+        .app-name { font-size: 1.4rem; margin: 0; font-weight: bold; background: -webkit-linear-gradient(#00d2ff, #3a7bd5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .version-tag { font-size: 0.7rem; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 10px; margin-top: 5px; display: inline-block; color: #bdc3c7; }
 
-        .menu-item { padding: 12px 15px; cursor: pointer; border-radius: 8px; margin-bottom: 5px; transition: 0.2s; display: flex; align-items: center; }
-        .menu-item:hover, .menu-item.active { background-color: var(--accent); transform: translateX(5px); }
+        /* Menu Item Hover Effect V2.9 */
+        .menu-item { padding: 12px 15px; cursor: pointer; border-radius: 8px; margin-bottom: 5px; transition: 0.2s; display: flex; align-items: center; border: 1px solid transparent; }
+        .menu-item:hover, .menu-item.active { 
+            background: rgba(255,255,255,0.15); 
+            border-left: 4px solid var(--accent);
+            transform: translateX(5px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
         .menu-icon { margin-right: 10px; width: 20px; text-align: center; }
-        .user-info { margin-top: auto; padding-top:20px; border-top:1px solid #546e7a; font-size: 0.9rem; }
+        .user-info { margin-top: auto; padding-top:20px; border-top:1px solid rgba(255,255,255,0.2); font-size: 0.9rem; }
         
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
-        .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; border-bottom: 4px solid var(--accent); }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; border-bottom: 4px solid var(--accent-dark); }
         .stat-number { font-size: 2.5rem; font-weight: 800; color: var(--primary); margin: 10px 0; }
         
         .chart-box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; }
         
         .resource-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
         .card { background: white; border-radius: 12px; padding: 0; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; transition: transform 0.2s; overflow: hidden; display: flex; flex-direction: column;}
-        .card:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         .card-content { padding: 20px; flex: 1; display: flex; flex-direction: column; }
         
         .app-preview { width: 100%; height: 180px; object-fit: contain; background-color: #e0e0e0; border-bottom: 1px solid #ddd; display: block; }
@@ -108,22 +105,11 @@
         .preview-icon { font-size: 3.5rem; margin-bottom: 10px; }
         .preview-type { font-size: 0.9rem; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; }
 
-        .card.teaching { border-top: 5px solid var(--accent); }
+        .card.teaching { border-top: 5px solid var(--accent-dark); }
         .card.admin { border-top: 5px solid var(--admin-color); }
         .card.value-edu { border-top: 5px solid var(--value-edu-color); }
         
-        /* Remarks Box V2.8 */
-        .remark-alert {
-            background-color: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeeba;
-            padding: 10px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            margin: 10px 0;
-            display: flex;
-            align-items: flex-start;
-        }
+        .remark-alert { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 10px; border-radius: 6px; font-size: 0.85rem; margin: 10px 0; display: flex; align-items: flex-start; }
         .remark-icon { margin-right: 6px; font-size: 1rem; }
 
         .rating-badge-container { display: flex; gap: 10px; margin: 15px 0; }
@@ -146,19 +132,14 @@
         .comment-input-group { display: flex; gap: 5px; }
         .comment-input { flex: 1; padding: 6px; font-size: 0.85rem; border: 1px solid #ddd; border-radius: 4px; }
 
-        /* V2.8 Tags Wrapping Fix */
-        .tags-container {
-            margin: 10px 0;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-        }
+        .tags-container { margin: 10px 0; display: flex; flex-wrap: wrap; gap: 5px; }
         .tag { background: #f0f2f5; padding: 4px 10px; border-radius: 15px; font-size: 0.8rem; color: #555; display: inline-flex; align-items: center;}
         .smart-tag { background: #e8f6f3; color: var(--success); border: 1px solid #d4efdf; }
         
         .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: 0.2s; font-weight: 600; }
-        .btn-primary { background-color: var(--accent); color: white; }
-        .btn-success { background-color: var(--success); color: white; }
+        .btn-primary { background: linear-gradient(135deg, #3a7bd5, #00d2ff); color: white; }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-success { background: linear-gradient(135deg, #11998e, #38ef7d); color: white; }
         .btn-admin { background-color: var(--admin-color); color: white; }
         .btn-value { background-color: var(--value-edu-color); color: white; }
         .btn-danger { background-color: var(--danger); color: white; }
@@ -169,26 +150,25 @@
         .form-group { margin-bottom: 18px; }
         .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #34495e; }
         .form-control { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
-        .form-control:disabled { background-color: #e9ecef; cursor: not-allowed; opacity: 0.7; }
         .prompt-box { background: #f8f9fa; border-left: 3px solid #f39c12; padding: 10px; font-size: 0.85rem; color: #555; margin-bottom: 10px; white-space: pre-wrap; font-family: monospace; max-height: 80px; overflow-y: auto;}
         
         .cross-subject-grid, .tags-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef; margin-top: 5px; }
         .checkbox-label { display: flex; align-items: center; font-size: 0.9rem; cursor: pointer; color: #555; }
         .checkbox-label input { margin-right: 8px; transform: scale(1.1); }
-        .tag-category-title { font-size: 0.85rem; color: var(--accent); font-weight: bold; margin-top: 10px; margin-bottom: 5px; width: 100%; grid-column: 1 / -1; border-bottom: 1px solid #e0e0e0; padding-bottom: 5px;}
+        .tag-category-title { font-size: 0.85rem; color: var(--accent-dark); font-weight: bold; margin-top: 10px; margin-bottom: 5px; width: 100%; grid-column: 1 / -1; border-bottom: 1px solid #e0e0e0; padding-bottom: 5px;}
 
-        #loginModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.9); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        #loginModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 30, 48, 0.9); display: flex; justify-content: center; align-items: center; z-index: 1000; }
         .login-box { background: white; padding: 40px; border-radius: 15px; width: 320px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         
         .lb-container { margin-top: 10px; }
         .lb-card { display: flex; align-items: center; background: #fcfcfc; border: 1px solid #eee; margin-bottom: 10px; padding: 12px; border-radius: 8px; transition: transform 0.2s; }
-        .lb-card:hover { transform: translateX(5px); border-color: var(--accent); }
+        .lb-card:hover { transform: translateX(5px); border-color: var(--accent-dark); }
         .lb-rank { width: 40px; font-size: 1.2rem; font-weight: 800; text-align: center; margin-right: 15px; }
         .lb-info { flex: 1; }
         .lb-name { font-weight: bold; font-size: 1rem; color: var(--primary); margin-bottom: 4px; }
         .lb-metrics { font-size: 0.8rem; color: #7f8c8d; display: flex; gap: 10px; }
         .lb-score-box { text-align: right; min-width: 70px; }
-        .lb-score-val { font-size: 1.4rem; font-weight: 800; color: var(--accent); line-height: 1; }
+        .lb-score-val { font-size: 1.4rem; font-weight: 800; color: var(--accent-dark); line-height: 1; }
         .lb-score-label { font-size: 0.7rem; color: #95a5a6; }
         
         .rank-1 { color: var(--gold); }
@@ -205,7 +185,7 @@
 
     <div id="loginModal">
         <div class="login-box">
-            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V2.8</h2>
+            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V2.9</h2>
             <p style="color:#7f8c8d; margin-bottom:20px;">請使用校方派發的帳號登入</p>
             <input type="email" id="loginEmail" class="form-control" placeholder="Email" style="margin-bottom:10px;">
             <input type="password" id="loginPass" class="form-control" placeholder="Password" style="margin-bottom:20px;">
@@ -220,7 +200,7 @@
         <div class="sidebar-header">
             <div class="school-name">香海正覺蓮社<br>佛教正覺蓮社學校</div>
             <h2 class="app-name">BCK-AI Hub</h2>
-            <div class="version-tag">V2.8</div>
+            <div class="version-tag">V2.9 Gradient</div>
         </div>
 
         <div class="menu-item active" onclick="showPage('dashboard')"><span class="menu-icon">📊</span> 數據總覽</div>
@@ -229,7 +209,7 @@
         <div class="menu-item" onclick="showPage('upload')"><span class="menu-icon">📤</span> 上載分享</div>
         <div class="user-info">
             <p>👋 <span id="currentUserDisplay">...</span> 老師</p>
-            <button class="btn btn-outline" style="width:100%; font-size:0.8rem;" onclick="logout()">登出</button>
+            <button class="btn btn-outline" style="width:100%; font-size:0.8rem; background:transparent; color:white; border:1px solid rgba(255,255,255,0.3);" onclick="logout()">登出</button>
         </div>
     </div>
 
@@ -246,7 +226,7 @@
             </div>
             
             <div class="stats-grid">
-                <div class="stat-card" style="border-bottom-color: var(--accent);">
+                <div class="stat-card" style="border-bottom-color: var(--accent-dark);">
                     <div class="stat-number" id="totalApps">0</div>
                     <div>學教評資源</div>
                 </div>
@@ -266,11 +246,11 @@
 
             <div class="charts-row">
                 <div class="chart-box">
-                    <h3 style="color:var(--accent)">🎓 學教評：5C+ 素養分佈</h3>
+                    <h3 style="color:var(--accent-dark)">🎓 學教評：5C+ 素養分佈</h3>
                     <canvas id="teachingChart"></canvas>
                 </div>
                 <div class="chart-box">
-                    <h3 style="color:var(--accent)">🎓 學教評：學科資源分佈</h3>
+                    <h3 style="color:var(--accent-dark)">🎓 學教評：學科資源分佈</h3>
                     <canvas id="subjectChart"></canvas>
                 </div>
             </div>
@@ -285,7 +265,6 @@
             <div class="chart-box">
                 <h3 style="display:flex; align-items:center; justify-content:space-between;">
                     <span>🏆 活躍貢獻與優質作品排行榜</span>
-                    <small style="font-size:0.8rem; font-weight:normal; color:#7f8c8d;">(綜合評分: 貢獻量50% + 平均分50%)</small>
                 </h3>
                 <div id="leaderboardList" class="lb-container"></div>
             </div>
@@ -388,7 +367,6 @@
                     <div class="form-group" id="linkInputGroup">
                         <label id="linkLabel">連結 (URL)</label>
                         <input type="text" id="appLink" class="form-control" placeholder="https://...">
-                        <small style="color:#7f8c8d; display:block; margin-top:5px;">💡 如為文件/影片，請貼上 Google Drive 或 YouTube 連結</small>
                     </div>
 
                     <div class="form-group" id="fileInputGroup" style="display:none;">
@@ -408,18 +386,17 @@
                     <div class="form-group">
                         <label style="color:var(--danger)">⚠️ 特別備註 (Optional)</label>
                         <input type="text" id="appRemarks" class="form-control" placeholder="例如：請勿隨意更改系統設定密碼 / 使用前請先備份..." style="border-color:#f5b7b1;">
-                        <small style="color:#7f8c8d;">此訊息會以黃色警示框顯示在資源卡片上。</small>
                     </div>
                     
                     <div class="form-group">
                         <label>Prompt: (參考指令)</label>
-                        <textarea id="appPrompt" class="form-control" rows="4" style="font-family:monospace; background:#fafafa;" placeholder="請貼上生成此資源的 AI 指令... (AI 將以此輔助標籤)" onblur="triggerAutoTag()"></textarea>
+                        <textarea id="appPrompt" class="form-control" rows="4" style="font-family:monospace; background:#fafafa;" placeholder="請貼上生成此資源的 AI 指令..." onblur="triggerAutoTag()"></textarea>
                     </div>
 
                     <div class="form-group">
                         <label>5C+ / 關鍵字標籤 (可複選)</label>
                         <div id="tagsCheckboxContainer" class="tags-grid">
-                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -488,6 +465,11 @@
             {val: "Collaboration", label: "協作 (Collaboration)"},
             {val: "Contribution", label: "貢獻 (Contribution)"}
         ];
+        
+        // V2.9 Tag Map for Display (Solves "Only Emoji" bug)
+        const tagMap = {};
+        tag5C.forEach(t => tagMap[t.val] = t.label);
+
         const tagKeywords = ["AI 生成", "評估工具", "課堂管理", "備課輔助", "差異化教學", "學生自學", "專題研習", "遊戲化學習", "行政效率", "其他"];
 
         function initSubjectCheckboxes() {
@@ -535,13 +517,10 @@
         function logout() { auth.signOut().then(() => location.reload()); }
         function updateUserDisplay() { document.getElementById('currentUserDisplay').innerText = currentUser.name; }
         
-        // V2.8 Sidebar Toggle Logic for Desktop & Mobile
         function toggleSidebar() { 
             if(window.innerWidth > 768) {
-                // Desktop: Collapse mode
                 document.body.classList.toggle('desktop-collapsed');
             } else {
-                // Mobile: Overlay mode
                 document.querySelector('.sidebar').classList.toggle('active'); 
                 document.querySelector('.sidebar-overlay').classList.toggle('active'); 
             }
@@ -585,9 +564,12 @@
             container.innerHTML = '';
             apps.forEach(app => {
                 try {
-                    // V2.8: Wrap tags in tags-container
+                    // V2.9 Fix: Use tagMap to display label if available, otherwise show value
                     const tagsHtml = Array.isArray(app.tags) 
-                        ? `<div class="tags-container">${app.tags.map(t => `<span class="tag smart-tag">🤖 ${t}</span>`).join('')}</div>`
+                        ? `<div class="tags-container">${app.tags.map(t => {
+                            const label = tagMap[t] || t; // Translate "Creativity" to "創意 (Creativity)"
+                            return `<span class="tag smart-tag">🤖 ${label}</span>`;
+                        }).join('')}</div>`
                         : '';
                     
                     let catBadge = '';
@@ -602,7 +584,7 @@
                             catBadge = `<span class="tag" style="background:var(--value-edu-color); color:white">💗 ${app.subject}</span>`;
                             cardClass = 'value-edu';
                         } else {
-                            const color = subjectColors[app.subject] || 'var(--accent)';
+                            const color = subjectColors[app.subject] || 'var(--accent-dark)';
                             catBadge = `<span class="tag" style="background:${color}; color:white">學教評: ${app.subject}</span>`;
                         }
                     } else {
@@ -664,8 +646,6 @@
                     }
 
                     const promptHtml = app.promptText ? `<div class="prompt-box" title="Prompt 指令">${app.promptText}</div>` : '';
-                    
-                    // V2.8 Remarks Box
                     const remarksHtml = app.remarks ? `<div class="remark-alert"><span class="remark-icon">⚠️</span><span><strong>備註：</strong>${app.remarks}</span></div>` : '';
 
                     let html = `
@@ -716,22 +696,15 @@
             const authors = new Set([...apps.map(a=>a.author), ...prompts.map(p=>p.author)]);
             document.getElementById('activeTeachers').innerText = authors.size;
 
-            // V2.8 Fixed 5C Counting Logic
-            // Reset counts
             const skillCounts = { "Communication":0, "Contribution":0, "Creativity":0, "Critical Thinking":0, "Collaboration":0 };
             
             teachingApps.forEach(a => {
                 let tagsList = [];
-                // Normalize tags to an array
                 if (a.tags) {
-                    if (Array.isArray(a.tags)) {
-                        tagsList = a.tags;
-                    } else if (typeof a.tags === 'string') {
-                        tagsList = a.tags.split(',').map(t => t.trim());
-                    }
+                    if (Array.isArray(a.tags)) { tagsList = a.tags; } 
+                    else if (typeof a.tags === 'string') { tagsList = a.tags.split(',').map(t => t.trim()); }
                 }
                 
-                // Check against 5C keys (case-insensitive include check)
                 tagsList.forEach(t => {
                     const tagLower = t.toLowerCase();
                     if(tagLower.includes("creativity")) skillCounts["Creativity"]++;
@@ -818,7 +791,6 @@
         function showPage(pageId) { 
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); 
             document.getElementById(pageId).classList.add('active'); 
-            // On mobile, auto close sidebar after selection
             if(window.innerWidth<=768 && document.querySelector('.sidebar').classList.contains('active')) {
                 toggleSidebar();
             }
@@ -866,12 +838,11 @@
                 let finalLink = document.getElementById('appLink').value;
                 if(rType === 'image' && document.getElementById('appFileBase64').value) { finalLink = document.getElementById('appFileBase64').value; }
                 
-                // V2.8 Include remarks
                 Object.assign(data, {
                     category: document.getElementById('appCategory').value, subject: document.getElementById('appSubject').value, crossSubjects: crossSubs,
                     adminType: document.getElementById('appAdminType').value, resourceType: rType, link: finalLink,
                     painPoint: document.getElementById('appPainPoint').value, promptText: document.getElementById('appPrompt').value,
-                    remarks: document.getElementById('appRemarks').value, // Capture Remarks
+                    remarks: document.getElementById('appRemarks').value,
                     tags: selectedTags
                 });
                 if(!isEdit) data.ratings = {}; 
@@ -889,16 +860,26 @@
             showPage('upload'); document.getElementById('editModeId').value = app.id; document.getElementById('uploadType').value = 'app'; toggleUploadForm();
             document.getElementById('appTitle').value = app.title; document.getElementById('appCategory').value = app.category; handleCategoryChange();
             document.getElementById('appSubject').value = app.subject || ""; handleSubjectChange(); 
-            if (app.subject === '跨課程' && app.crossSubjects) { app.crossSubjects.forEach(sub => { const cb = document.querySelector(`input[name="crossSub"][value="${sub}"]`); if(cb) cb.checked = true; }); }
+            
+            // V2.9 Fix: Robustly reset and re-check cross-subjects
+            document.querySelectorAll('input[name="crossSub"]').forEach(cb => cb.checked = false);
+            if (app.subject === '跨課程' && app.crossSubjects && Array.isArray(app.crossSubjects)) {
+                // Ensure section is visible first
+                document.getElementById('crossSubjectSection').style.display = 'block';
+                app.crossSubjects.forEach(sub => {
+                    // Trim matches to avoid whitespace issues
+                    const cb = document.querySelector(`input[name="crossSub"][value="${sub.trim()}"]`);
+                    if(cb) cb.checked = true;
+                });
+            }
+
             document.getElementById('appAdminType').value = app.adminType || "";
             document.getElementById('resourceType').value = app.resourceType || 'url'; handleResourceTypeChange();
             if(app.resourceType === 'image' && app.link.startsWith('data:')) { document.getElementById('imagePreview').src = app.link; document.getElementById('imagePreviewBox').style.display = 'block'; document.getElementById('appFileBase64').value = app.link; } else { document.getElementById('appLink').value = app.link; }
             document.getElementById('appPainPoint').value = app.painPoint; document.getElementById('appPrompt').value = app.promptText || ""; 
             
-            // V2.8 Edit Remarks
             document.getElementById('appRemarks').value = app.remarks || "";
 
-            // Populate Tag Checkboxes
             document.querySelectorAll('input[name="appTag"]').forEach(cb => cb.checked = false); 
             if(app.tags && Array.isArray(app.tags)) {
                 app.tags.forEach(tag => {
