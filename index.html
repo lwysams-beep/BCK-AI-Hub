@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BCK-AI Hub | 正覺蓮社 AI 智慧庫 V1.3</title>
+    <title>BCK-AI Hub | 正覺蓮社 AI 智慧庫 V1.4</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -11,7 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     
     <style>
-        /* CSS 樣式維持不變 */
+        /* CSS V1.4 Update */
         :root {
             --primary: #2c3e50;
             --accent: #3498db;
@@ -36,15 +36,23 @@
         .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; border-bottom: 4px solid var(--accent); }
         .stat-number { font-size: 2.5rem; font-weight: 800; color: var(--primary); margin: 10px 0; }
         
-        /* 修改 Charts Section 為 3 欄佈局以容納新圖表，或保持彈性 */
-        .charts-section { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 20px; }
-        .chart-box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        /* Layout for Charts */
+        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .chart-box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; }
+        .chart-full-width { grid-column: span 2; } /* Not used in new layout but kept for utility */
 
-        .resource-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
-        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; transition: transform 0.2s; }
+        .resource-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
+        .card { background: white; border-radius: 12px; padding: 0; /* Padding removed for image */ box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; transition: transform 0.2s; overflow: hidden; display: flex; flex-direction: column;}
         .card:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+        .card-content { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+        
+        /* Preview Image Styling */
+        .app-preview { width: 100%; height: 160px; object-fit: cover; object-position: top; border-bottom: 1px solid #eee; background-color: #f9f9f9; display: block;}
+        .app-preview-placeholder { height: 160px; background: linear-gradient(135deg, #e0e0e0, #f5f5f5); display: flex; align-items: center; justify-content: center; color: #aaa; font-size: 2rem; }
+
         .card.teaching { border-top: 5px solid var(--accent); }
         .card.admin { border-top: 5px solid var(--admin-color); }
+        
         .rating-badge-container { display: flex; gap: 10px; margin: 15px 0; }
         .badge-rate { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px 10px; border-radius: 8px; color: white; font-weight: bold; min-width: 60px; }
         .bg-ease { background: linear-gradient(135deg, #f1c40f, #f39c12); }
@@ -53,19 +61,22 @@
         .rate-score { font-size: 1.2rem; }
         .tag { background: #f0f2f5; padding: 4px 10px; border-radius: 15px; font-size: 0.8rem; color: #555; margin-right: 5px; display: inline-block; margin-bottom: 5px;}
         .smart-tag { background: #e8f6f3; color: var(--success); border: 1px solid #d4efdf; }
+        
         .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: 0.2s; font-weight: 600; }
         .btn-primary { background-color: var(--accent); color: white; }
         .btn-success { background-color: var(--success); color: white; }
         .btn-admin { background-color: var(--admin-color); color: white; }
+        .btn-danger { background-color: var(--danger); color: white; } /* New delete button style */
         .btn-outline { border: 1px solid #ccc; background: white; color: #555; }
+        
         .form-group { margin-bottom: 18px; }
         .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #34495e; }
         .form-control { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
         .form-control:disabled { background-color: #e9ecef; cursor: not-allowed; opacity: 0.7; }
+        
         #loginModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.9); display: flex; justify-content: center; align-items: center; z-index: 1000; }
         .login-box { background: white; padding: 40px; border-radius: 15px; width: 320px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         
-        /* 排行榜樣式優化 */
         .leaderboard-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
         .leaderboard-item:last-child { border-bottom: none; }
         .lb-rank { width: 30px; font-weight: bold; color: #7f8c8d; }
@@ -80,12 +91,10 @@
 
     <div id="loginModal">
         <div class="login-box">
-            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V1.3</h2>
+            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V1.4</h2>
             <p style="color:#7f8c8d; margin-bottom:20px;">請使用校方派發的帳號登入</p>
-            
-            <input type="email" id="loginEmail" class="form-control" placeholder="Email (例如: chan@bck.edu.hk)" style="margin-bottom:10px;">
+            <input type="email" id="loginEmail" class="form-control" placeholder="Email" style="margin-bottom:10px;">
             <input type="password" id="loginPass" class="form-control" placeholder="Password" style="margin-bottom:20px;">
-            
             <button id="loginBtn" class="btn btn-primary" style="width:100%" onclick="handleLogin()">登入系統</button>
             <p style="margin-top:15px; font-size:0.8rem; color:#e74c3c;" id="loginMsg"></p>
         </div>
@@ -97,7 +106,6 @@
         <div class="menu-item" onclick="showPage('apps')"><span class="menu-icon">📱</span> 應用程式庫</div>
         <div class="menu-item" onclick="showPage('prompts')"><span class="menu-icon">💡</span> Prompt 分享</div>
         <div class="menu-item" onclick="showPage('upload')"><span class="menu-icon">📤</span> 上載分享</div>
-        
         <div class="user-info">
             <p>👋 <span id="currentUserDisplay">...</span> 老師</p>
             <button class="btn btn-outline" style="width:100%; font-size:0.8rem;" onclick="logout()">登出</button>
@@ -105,7 +113,6 @@
     </div>
 
     <div class="main-content">
-        
         <div id="dashboard" class="page active">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <h1>平台數據儀表板</h1>
@@ -131,7 +138,7 @@
                 </div>
             </div>
 
-            <div class="charts-section">
+            <div class="charts-row">
                 <div class="chart-box">
                     <h3 style="color:var(--accent)">🎓 學教評：5C+ 素養分佈</h3>
                     <canvas id="teachingChart"></canvas>
@@ -140,8 +147,11 @@
                     <h3 style="color:var(--accent)">🎓 學教評：學科資源分佈</h3>
                     <canvas id="subjectChart"></canvas>
                 </div>
-                <div class="chart-box">
-                    <h3 style="color:var(--admin-color)">📂 行政：效能類別分析</h3>
+            </div>
+
+            <div class="chart-box" style="margin-bottom: 20px;">
+                <h3 style="color:var(--admin-color)">📂 行政：效能類別分析 (全覽)</h3>
+                <div style="height: 350px;">
                     <canvas id="adminChart"></canvas>
                 </div>
             </div>
@@ -172,7 +182,6 @@
         <div id="upload" class="page">
             <h1>上載 / 編輯資源</h1>
             <div style="background:white; padding:30px; border-radius:12px; max-width: 800px; margin:0 auto;">
-                
                 <input type="hidden" id="editModeId" value="">
 
                 <div class="form-group">
@@ -229,7 +238,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label>連結 (URL)</label>
+                        <label>連結 (URL) <small style="color:#e74c3c;">*輸入正確網址將自動生成預覽圖</small></label>
                         <input type="text" id="appLink" class="form-control" placeholder="https://...">
                     </div>
                     <div class="form-group">
@@ -262,8 +271,9 @@
                 </div>
 
                 <div style="display:flex; gap:10px; margin-top:20px;">
-                    <button id="submitBtn" class="btn btn-primary" style="flex:1" onclick="submitUpload()">確認發布</button>
-                    <button id="cancelBtn" class="btn btn-outline" style="display:none" onclick="resetForm()">取消編輯</button>
+                    <button id="submitBtn" class="btn btn-primary" style="flex:2" onclick="submitUpload()">確認發布</button>
+                    <button id="cancelBtn" class="btn btn-outline" style="flex:1; display:none" onclick="resetForm(true)">取消編輯</button>
+                    <button id="deleteBtn" class="btn btn-danger" style="flex:1; display:none" onclick="deleteResource()">🗑️ 刪除</button>
                 </div>
             </div>
         </div>
@@ -271,7 +281,7 @@
 
     <script>
         // ==========================================
-        // CONFIGURATION ZONE V1.3
+        // CONFIGURATION ZONE V1.4
         // ==========================================
         const firebaseConfig = {
           apiKey: "AIzaSyBPRN5_vnvMOPAR0fTVaZoqM57ffIGZOQU",
@@ -282,14 +292,13 @@
           appId: "1:1010987556331:web:07dac81847056ae7520dae"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
         
         let currentUser = null;
         let teachingChartRef = null;
-        let subjectChartRef = null; // New Pie Chart Ref
+        let subjectChartRef = null;
         let adminChartRef = null;
 
         const teacherDirectory = {
@@ -345,7 +354,6 @@
         function logout() { auth.signOut().then(() => location.reload()); }
         function updateUserDisplay() { document.getElementById('currentUserDisplay').innerText = currentUser.name; }
 
-        // --- Data Logic ---
         async function loadData() {
             try {
                 const appsSnap = await db.collection('apps').orderBy('timestamp', 'desc').get();
@@ -358,27 +366,22 @@
                 renderPrompts(prompts);
             } catch (e) {
                 console.error("Error loading data:", e);
-                alert("數據讀取錯誤");
             }
         }
 
-        // --- Render Dashboard (Updated for Requirements) ---
         function renderDashboard(apps, prompts) {
             const teachingApps = apps.filter(a => a.category === 'teaching');
             const adminApps = apps.filter(a => a.category === 'admin');
             
-            // 1. Stat Cards
             document.getElementById('totalApps').innerText = teachingApps.length;
             document.getElementById('totalAdmin').innerText = adminApps.length;
             document.getElementById('totalPrompts').innerText = prompts.length;
             const authors = new Set([...apps.map(a=>a.author), ...prompts.map(p=>p.author)]);
             document.getElementById('activeTeachers').innerText = authors.size;
 
-            // 2. Charts
-            // 2a. Teaching Radar (5C+)
+            // 1. Teaching Radar
             const skillCounts = { "Communication":0, "Contribution":0, "Creativity":0, "Critical Thinking":0, "Collaboration":0 };
             teachingApps.forEach(a => { if(a.tags) a.tags.forEach(t => { if(skillCounts[t] !== undefined) skillCounts[t]++; }); });
-            
             const ctx1 = document.getElementById('teachingChart').getContext('2d');
             if(teachingChartRef) teachingChartRef.destroy();
             teachingChartRef = new Chart(ctx1, {
@@ -390,26 +393,20 @@
                 options: { scales: { r: { beginAtZero: true, suggestMax: 5 } } }
             });
 
-            // 2b. Teaching Pie Chart (Subjects) - NEW
+            // 2. Subject Pie
             const subjectCounts = {};
-            teachingApps.forEach(a => {
-                const subj = a.subject || "未分類";
-                subjectCounts[subj] = (subjectCounts[subj] || 0) + 1;
-            });
+            teachingApps.forEach(a => { const subj = a.subject || "未分類"; subjectCounts[subj] = (subjectCounts[subj] || 0) + 1; });
             const ctxSub = document.getElementById('subjectChart').getContext('2d');
             if(subjectChartRef) subjectChartRef.destroy();
             subjectChartRef = new Chart(ctxSub, {
                 type: 'pie',
                 data: {
                     labels: Object.keys(subjectCounts),
-                    datasets: [{
-                        data: Object.values(subjectCounts),
-                        backgroundColor: ['#e74c3c', '#3498db', '#f1c40f', '#2ecc71', '#9b59b6', '#e67e22', '#1abc9c']
-                    }]
+                    datasets: [{ data: Object.values(subjectCounts), backgroundColor: ['#e74c3c', '#3498db', '#f1c40f', '#2ecc71', '#9b59b6', '#e67e22', '#1abc9c'] }]
                 }
             });
 
-            // 2c. Admin Bar Chart
+            // 3. Admin Bar (Full Width)
             const adminCounts = {};
             adminApps.forEach(a => { const type = a.adminType || "未分類"; adminCounts[type] = (adminCounts[type] || 0) + 1; });
             const ctx2 = document.getElementById('adminChart').getContext('2d');
@@ -420,43 +417,32 @@
                     labels: Object.keys(adminCounts),
                     datasets: [{ label: '行政工具分類', data: Object.values(adminCounts), backgroundColor: ['#8e44ad', '#9b59b6', '#af7ac5', '#c39bd3', '#e8daef', '#76448a'] }]
                 },
-                options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, // Allow custom height control
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } 
+                }
             });
             
-            // 3. Leaderboard (Updated with Score logic)
+            // Leaderboard (Logic same as V1.3)
             const authorStats = {};
-            
             [...apps, ...prompts].forEach(item => {
                 const author = item.author;
                 if(!authorStats[author]) authorStats[author] = { count: 0, totalScore: 0, maxScore: 0, bestItem: null };
-                
-                // 模擬評分 (因為DB還沒存分，這裡模擬 3.5 - 5.0 之間的隨機分數)
-                // 在正式版應從 item.rating 獲取
                 const score = item.rating ? parseFloat(item.rating) : (Math.random() * 1.5 + 3.5).toFixed(1);
-                
                 const s = authorStats[author];
                 s.count++;
                 s.totalScore += parseFloat(score);
-                if(parseFloat(score) > s.maxScore) {
-                    s.maxScore = parseFloat(score);
-                    s.bestItem = item;
-                }
+                if(parseFloat(score) > s.maxScore) { s.maxScore = parseFloat(score); s.bestItem = item; }
             });
-
             const sortedAuthors = Object.keys(authorStats).sort((a,b) => authorStats[b].count - authorStats[a].count).slice(0, 5);
-            
             const lb = document.getElementById('leaderboardList');
             lb.innerHTML = '';
-            
             sortedAuthors.forEach((name, index) => {
                 const stat = authorStats[name];
                 const avg = (stat.totalScore / stat.count).toFixed(1);
                 const bestTitle = stat.bestItem.title.length > 8 ? stat.bestItem.title.substring(0,8)+"..." : stat.bestItem.title;
-                // 如果是 Prompt 則複製，App 則連結
-                const linkAction = stat.bestItem.link 
-                    ? `href="${stat.bestItem.link}" target="_blank"` 
-                    : `href="#" onclick="alert('請到 Prompt 區查看: ${stat.bestItem.title}');return false;"`;
-
+                const linkAction = stat.bestItem.link ? `href="${stat.bestItem.link}" target="_blank"` : `href="#" onclick="alert('請到 Prompt 區查看');return false;"`;
                 lb.innerHTML += `
                     <div class="leaderboard-item">
                         <div class="lb-rank">#${index+1}</div>
@@ -464,17 +450,12 @@
                         <div class="lb-stats">
                             <div><span class="lb-highlight">${stat.count}</span> 貢獻</div>
                             <div style="font-size:0.75rem">平均 <span style="color:#f39c12">★${avg}</span></div>
-                            <div style="font-size:0.75rem; margin-top:2px;">
-                                最高分: ★${stat.maxScore} 
-                                <a ${linkAction} class="lb-link" title="${stat.bestItem.title}">GO: ${bestTitle}</a>
-                            </div>
+                            <div style="font-size:0.75rem;">Max: ★${stat.maxScore} <a ${linkAction} class="lb-link">GO: ${bestTitle}</a></div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
         }
 
-        // --- Render Apps ---
         function renderApps(apps) {
             const container = document.getElementById('appsContainer');
             container.innerHTML = '';
@@ -483,22 +464,34 @@
                 const catBadge = app.category === 'teaching' 
                     ? `<span class="tag" style="background:var(--accent); color:white">學教評: ${app.subject}</span>`
                     : `<span class="tag" style="background:var(--admin-color); color:white">行政: ${app.adminType}</span>`;
+                
                 const isAuthor = (app.author === currentUser.name) || (app.authorEmail && app.authorEmail === currentUser.email);
                 const editBtn = isAuthor ? `<button class="btn btn-outline" style="font-size:0.7rem; float:right" onclick='editApp(${JSON.stringify(app)})'>✏️ 編輯</button>` : '';
                 
+                // V1.4 Preview Image Logic (Using generic placeholder or external thumbnail service)
+                // Using Thum.io for demo (Free plan might show watermark or be slow, but it works for MVPs)
+                // Fallback to placeholder if no link
+                let imgHtml = `<div class="app-preview-placeholder"><span style="font-size:3rem">📱</span></div>`;
+                if(app.link && app.link.startsWith('http')) {
+                    imgHtml = `<img src="https://image.thum.io/get/width/400/crop/800/allowJPG/${app.link}" class="app-preview" onerror="this.style.display='none'">`;
+                }
+
                 let html = `
                     <div class="card ${app.category}" data-cat="${app.category}">
-                        <h3>${app.title} ${editBtn}</h3>
-                        <div style="font-size:0.85rem; color:#7f8c8d; margin-bottom:10px;">由 ${app.author} 提供</div>
-                        <div>${catBadge}</div>
-                        <p style="font-size:0.9rem; color:#444"><strong>💡 解決難點：</strong> ${app.painPoint}</p>
-                        <p style="font-size:0.9rem;">${app.desc}</p>
-                        <div style="margin:10px 0;">${tagsHtml}</div>
-                        <div class="rating-badge-container">
-                            <div class="badge-rate bg-ease"><span class="rate-label">易用度</span><span class="rate-score">4.5</span></div>
-                            <div class="badge-rate bg-effect"><span class="rate-label">成效</span><span class="rate-score">4.2</span></div>
+                        ${imgHtml}
+                        <div class="card-content">
+                            <h3 style="margin-top:0">${app.title} ${editBtn}</h3>
+                            <div style="font-size:0.85rem; color:#7f8c8d; margin-bottom:10px;">由 ${app.author} 提供</div>
+                            <div>${catBadge}</div>
+                            <p style="font-size:0.9rem; color:#444"><strong>💡 解決難點：</strong> ${app.painPoint}</p>
+                            <p style="font-size:0.9rem; flex:1;">${app.desc}</p>
+                            <div style="margin:10px 0;">${tagsHtml}</div>
+                            <div class="rating-badge-container">
+                                <div class="badge-rate bg-ease"><span class="rate-label">易用度</span><span class="rate-score">4.5</span></div>
+                                <div class="badge-rate bg-effect"><span class="rate-label">成效</span><span class="rate-score">4.2</span></div>
+                            </div>
+                            <a href="${app.link}" target="_blank" class="btn btn-primary" style="display:block; text-align:center">前往工具</a>
                         </div>
-                        <a href="${app.link}" target="_blank" class="btn btn-primary" style="display:block; text-align:center">前往工具</a>
                     </div>
                 `;
                 container.innerHTML += html;
@@ -509,42 +502,39 @@
             const container = document.getElementById('promptsContainer');
             container.innerHTML = '';
             prompts.forEach(p => {
+                const isAuthor = (p.author === currentUser.name) || (p.authorEmail && p.authorEmail === currentUser.email);
+                const editBtn = isAuthor ? `<button class="btn btn-outline" style="font-size:0.7rem; float:right" onclick='editPrompt(${JSON.stringify(p)})'>✏️</button>` : '';
+
                 container.innerHTML += `
                     <div class="card">
-                        <h3>${p.title} <small style="font-size:0.8rem">${p.author}</small></h3>
-                        <p><strong>🎯 用途：</strong>${p.purpose}</p>
-                        <div style="background:#2c3e50; color:#2ecc71; padding:15px; border-radius:8px; font-family:monospace; margin:10px 0; max-height:150px; overflow-y:auto; white-space:pre-wrap; font-size:0.9rem;">${p.content}</div>
-                        <button class="btn btn-outline" onclick="navigator.clipboard.writeText(\`${p.content}\`);alert('已複製！')">複製指令</button>
+                        <div class="card-content">
+                            <h3>${p.title} ${editBtn} <small style="font-size:0.8rem; display:block; margin-top:5px; font-weight:normal">${p.author}</small></h3>
+                            <p><strong>🎯 用途：</strong>${p.purpose}</p>
+                            <div style="background:#2c3e50; color:#2ecc71; padding:15px; border-radius:8px; font-family:monospace; margin:10px 0; max-height:150px; overflow-y:auto; white-space:pre-wrap; font-size:0.9rem;">${p.content}</div>
+                            <button class="btn btn-outline" onclick="navigator.clipboard.writeText(\`${p.content}\`);alert('已複製！')">複製指令</button>
+                        </div>
                     </div>
                 `;
             });
         }
 
-        // --- UI Navigation Logic (Fixed) ---
         function showPage(pageId) {
-            // 切換頁面內容
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
-
-            // 切換 Sidebar Menu Active 狀態
             document.querySelectorAll('.menu-item').forEach(item => {
                 item.classList.remove('active');
-                // 檢查該按鈕的 onclick 事件字串是否包含當前 pageId
-                if(item.getAttribute('onclick').includes(`'${pageId}'`)) {
-                    item.classList.add('active');
-                }
+                if(item.getAttribute('onclick').includes(`'${pageId}'`)) item.classList.add('active');
             });
         }
 
         function filterApps(type) {
             const cards = document.querySelectorAll('.card[data-cat]');
             cards.forEach(c => {
-                if(type === 'all') c.style.display = 'block';
-                else c.style.display = c.getAttribute('data-cat') === type ? 'block' : 'none';
+                if(type === 'all') c.style.display = 'flex';
+                else c.style.display = c.getAttribute('data-cat') === type ? 'flex' : 'none';
             });
         }
 
-        // --- Form Handling ---
         function handleCategoryChange() {
             const cat = document.getElementById('appCategory').value;
             const subEl = document.getElementById('appSubject');
@@ -609,10 +599,23 @@
 
             action.then(() => {
                 alert(isEdit ? "更新成功" : "發布成功");
-                resetForm();
+                resetForm(true); // Redirect after success
                 loadData();
-                showPage(collection === 'apps' ? 'apps' : 'prompts');
             }).catch(e => alert("錯誤: " + e.message));
+        }
+
+        function deleteResource() {
+            const docId = document.getElementById('editModeId').value;
+            if(!docId) return;
+
+            if(confirm("⚠️ 確定要刪除這個資源嗎？此動作無法還原。")) {
+                const collection = document.getElementById('uploadType').value === 'app' ? 'apps' : 'prompts';
+                db.collection(collection).doc(docId).delete().then(() => {
+                    alert("已刪除");
+                    resetForm(true); // Redirect after delete
+                    loadData();
+                }).catch(e => alert("刪除失敗: " + e.message));
+            }
         }
 
         function editApp(app) {
@@ -629,20 +632,48 @@
             document.getElementById('appPainPoint').value = app.painPoint;
             document.getElementById('appDesc').value = app.desc;
             document.getElementById('appTags').value = Array.isArray(app.tags) ? app.tags.join(", ") : app.tags;
+            
             const btn = document.getElementById('submitBtn');
             btn.innerText = "確認更新";
             btn.classList.replace('btn-primary', 'btn-success');
             document.getElementById('cancelBtn').style.display = 'block';
+            document.getElementById('deleteBtn').style.display = 'block'; // Show Delete Button
         }
 
-        function resetForm() {
+        function editPrompt(p) {
+            showPage('upload');
+            document.getElementById('editModeId').value = p.id;
+            document.getElementById('uploadType').value = 'prompt';
+            toggleUploadForm();
+            document.getElementById('promptTitle').value = p.title;
+            document.getElementById('promptContent').value = p.content;
+            document.getElementById('promptPurpose').value = p.purpose;
+
+            const btn = document.getElementById('submitBtn');
+            btn.innerText = "確認更新";
+            btn.classList.replace('btn-primary', 'btn-success');
+            document.getElementById('cancelBtn').style.display = 'block';
+            document.getElementById('deleteBtn').style.display = 'block';
+        }
+
+        // Modified resetForm to handle redirection
+        function resetForm(shouldRedirect = false) {
             document.getElementById('editModeId').value = "";
             document.querySelectorAll('input, textarea').forEach(i => i.value = "");
             document.getElementById('appTags').value = "General";
+            
             const btn = document.getElementById('submitBtn');
             btn.innerText = "確認發布";
             btn.classList.replace('btn-success', 'btn-primary');
+            
             document.getElementById('cancelBtn').style.display = 'none';
+            document.getElementById('deleteBtn').style.display = 'none';
+
+            // Redirect back to list if requested (Cancel or Delete)
+            if (shouldRedirect) {
+                const currentType = document.getElementById('uploadType').value;
+                showPage(currentType === 'app' ? 'apps' : 'prompts');
+            }
         }
 
         function exportDataReport() {
