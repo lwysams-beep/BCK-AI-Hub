@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Hub | 資源展示庫 V3.2</title>
+    <title>AI Hub | 資源展示庫 V3.3</title>
+    
+    <link rel="icon" href="https://img.icons8.com/fluency/96/artificial-intelligence.png" type="image/png">
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -11,7 +14,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     
     <style>
-        /* CSS V3.2 - Admin Tag Lock Fix */
+        /* CSS V3.3 - Type Badge & Favicon Update */
         :root {
             --primary: #2c3e50;
             --accent: #00d2ff;
@@ -29,7 +32,6 @@
         }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f4f7f6; display: flex; height: 100vh; overflow-x: hidden; }
         
-        /* Gradient Sidebar */
         .sidebar { 
             width: 260px; 
             background: linear-gradient(135deg, #141e30 0%, #243b55 100%);
@@ -94,6 +96,26 @@
         .card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         .card-content { padding: 20px; flex: 1; display: flex; flex-direction: column; }
         
+        /* 2. 新增：左上角檔案類型標籤樣式 */
+        .type-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.75);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            pointer-events: none; /* 讓點擊穿透 */
+        }
+
         .app-preview { width: 100%; height: 180px; object-fit: contain; background-color: #e0e0e0; border-bottom: 1px solid #ddd; display: block; }
         .app-preview-placeholder { height: 180px; background: linear-gradient(135deg, #e0e0e0, #f5f5f5); display: flex; align-items: center; justify-content: center; color: #aaa; font-size: 2rem; flex-direction: column;}
         .preview-icon { font-size: 3.5rem; margin-bottom: 10px; }
@@ -129,7 +151,6 @@
         .tags-container { margin: 10px 0; display: flex; flex-wrap: wrap; gap: 5px; }
         .tag { padding: 4px 10px; border-radius: 15px; font-size: 0.75rem; display: inline-flex; align-items: center;}
         
-        /* New Tag Styles */
         .smart-tag { background: #e8f6f3; color: var(--success); border: 1px solid #d4efdf; }
         .keyword-tag { background: #f4f6f7; color: #5d6d7e; border: 1px solid #d5dbdb; }
         
@@ -182,7 +203,7 @@
 
     <div id="loginModal">
         <div class="login-box">
-            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V3.2</h2>
+            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V3.3</h2>
             <p style="color:#7f8c8d; margin-bottom:20px;">請使用校方派發的帳號登入</p>
             <input type="email" id="loginEmail" class="form-control" placeholder="Email" style="margin-bottom:10px;">
             <input type="password" id="loginPass" class="form-control" placeholder="Password" style="margin-bottom:20px;">
@@ -197,7 +218,7 @@
         <div class="sidebar-header">
             <div class="school-name">香海正覺蓮社<br>佛教正覺蓮社學校</div>
             <h2 class="app-name">BCK-AI Hub</h2>
-            <div class="version-tag">V3.2 Fix</div>
+            <div class="version-tag">V3.3 UI Update</div>
         </div>
 
         <div id="menu-dashboard" class="menu-item active" onclick="showPage('dashboard')"><span class="menu-icon">📊</span> 數據總覽</div>
@@ -472,6 +493,17 @@
 
         const tagKeywords = ["AI 生成", "評估工具", "課堂管理", "備課輔助", "差異化教學", "學生自學", "專題研習", "遊戲化學習", "行政效率", "其他"];
 
+        // 3. 資源類型對照表 (用於顯示徽章)
+        const resourceTypeConfig = {
+            'url': { icon: '🌐', label: '網頁', color: '#3498db' },
+            'image': { icon: '🖼️', label: '圖片', color: '#9b59b6' },
+            'video': { icon: '🎬', label: '影片', color: '#e74c3c' },
+            'audio': { icon: '🔊', label: '聲音', color: '#f1c40f' },
+            'presentation': { icon: '📊', label: '簡報', color: '#e67e22' },
+            'worksheet': { icon: '📄', label: '文件', color: '#2ecc71' },
+            'lessonplan': { icon: '📝', label: '教案', color: '#1abc9c' }
+        };
+
         function initSubjectCheckboxes() {
             const container = document.getElementById('crossSubjectCheckboxes');
             container.innerHTML = '';
@@ -610,6 +642,11 @@
                     
                     let previewHtml = '';
                     const type = app.resourceType || 'url';
+                    
+                    // 4. Generate Type Badge
+                    const typeInfo = resourceTypeConfig[type] || resourceTypeConfig['url'];
+                    const typeBadgeHtml = `<div class="type-badge">${typeInfo.icon} ${typeInfo.label}</div>`;
+
                     if (type === 'image' && app.link && app.link.startsWith('data:image')) {
                         previewHtml = `<img src="${app.link}" class="app-preview" style="object-fit:contain;">`;
                     } else if (type === 'video') {
@@ -663,7 +700,7 @@
 
                     let html = `
                         <div class="card ${cardClass}" data-cat="${app.category}" data-sub="${app.subject}">
-                            ${previewHtml}
+                            ${typeBadgeHtml} ${previewHtml}
                             <div class="card-content">
                                 <h3 style="margin-top:0">${app.title} ${editBtn}</h3>
                                 <div style="font-size:0.85rem; color:#7f8c8d; margin-bottom:10px;">
@@ -815,7 +852,6 @@
 
         function filterApps(type) { document.querySelectorAll('.card').forEach(c => { c.style.display = 'none'; const cat=c.getAttribute('data-cat'), sub=c.getAttribute('data-sub'); if(type==='all' || (type==='value'&&sub==='價值觀教育') || cat===type) c.style.display='flex'; }); }
         
-        // V3.2 Fixed Logic: Lock Tags when Admin is selected
         function handleCategoryChange() { 
             const cat = document.getElementById('appCategory').value; 
             const isAdmin = (cat === 'admin');
@@ -826,14 +862,11 @@
             
             const tagsContainer = document.getElementById('tagsCheckboxContainer');
             if (isAdmin) {
-                // Disable and Gray out
                 tagsContainer.style.opacity = '0.4';
                 tagsContainer.style.pointerEvents = 'none';
                 tagsContainer.style.filter = 'grayscale(100%)';
-                // Clear all checked boxes
                 tagsContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
             } else {
-                // Enable
                 tagsContainer.style.opacity = '1';
                 tagsContainer.style.pointerEvents = 'auto';
                 tagsContainer.style.filter = 'none';
@@ -845,27 +878,20 @@
         function submitRating(appId) { const ease = document.getElementById(`ease_${appId}`).value, effect = document.getElementById(`effect_${appId}`).value; const data = {}; data[`ratings.${currentUser.uid}`] = { ease: parseInt(ease), effect: parseInt(effect) }; db.collection('apps').doc(appId).update(data).then(() => { alert("評分成功！"); loadData(); }).catch(e => { db.collection('apps').doc(appId).set({ ratings: { [currentUser.uid]: { ease: parseInt(ease), effect: parseInt(effect) } } }, { merge: true }).then(() => { alert("評分成功！"); loadData(); }); }); }
         
         function triggerAutoTag() {
-            // If admin, do not trigger auto tag
             if (document.getElementById('appCategory').value === 'admin') return;
-
             const prompt = document.getElementById('appPrompt').value; 
             const title = document.getElementById('appTitle').value; 
             const combined = prompt + title;
-            
             if(combined.includes("畫") || combined.includes("創") || combined.includes("Design")) checkTag("Creativity");
             if(combined.includes("問") || combined.includes("思") || combined.includes("Think")) checkTag("Critical Thinking");
             if(combined.includes("組") || combined.includes("合") || combined.includes("Group")) checkTag("Collaboration");
             if(combined.includes("說") || combined.includes("話") || combined.includes("Speak")) checkTag("Communication");
             if(combined.includes("幫") || combined.includes("享") || combined.includes("Share")) checkTag("Contribution");
-            
             if(combined.includes("AI")) checkTag("AI 生成");
             if(combined.includes("評估") || combined.includes("測驗")) checkTag("評估工具");
         }
         
-        function checkTag(val) {
-            const cb = document.querySelector(`input[name="appTag"][value="${val}"]`);
-            if(cb) cb.checked = true;
-        }
+        function checkTag(val) { const cb = document.querySelector(`input[name="appTag"][value="${val}"]`); if(cb) cb.checked = true; }
 
         function toggleUploadForm() { const type = document.getElementById('uploadType').value; document.getElementById('appForm').style.display = type === 'app' ? 'block' : 'none'; document.getElementById('promptForm').style.display = type === 'prompt' ? 'block' : 'none'; }
         
@@ -878,7 +904,6 @@
                 if(document.getElementById('appSubject').value === '跨課程') { document.querySelectorAll('input[name="crossSub"]:checked').forEach(cb => { if(cb.value) crossSubs.push(cb.value); }); }
                 
                 let selectedTags = [];
-                // Only collect tags if not admin (double check)
                 if (document.getElementById('appCategory').value !== 'admin') {
                     document.querySelectorAll('input[name="appTag"]:checked').forEach(cb => selectedTags.push(cb.value));
                 }
@@ -908,38 +933,22 @@
         function editApp(app) {
             showPage('upload'); document.getElementById('editModeId').value = app.id; document.getElementById('uploadType').value = 'app'; toggleUploadForm();
             document.getElementById('appTitle').value = app.title; document.getElementById('appCategory').value = app.category; 
-            
-            // Run this to set UI state (Admin locked tags vs Teaching unlocked)
             handleCategoryChange();
-
             document.getElementById('appSubject').value = app.subject || ""; handleSubjectChange(); 
-            
             document.querySelectorAll('input[name="crossSub"]').forEach(cb => cb.checked = false);
             if (app.subject === '跨課程' && app.crossSubjects && Array.isArray(app.crossSubjects)) {
                 document.getElementById('crossSubjectSection').style.display = 'block';
-                app.crossSubjects.forEach(sub => {
-                    const cb = document.querySelector(`input[name="crossSub"][value="${sub.trim()}"]`);
-                    if(cb) cb.checked = true;
-                });
+                app.crossSubjects.forEach(sub => { const cb = document.querySelector(`input[name="crossSub"][value="${sub.trim()}"]`); if(cb) cb.checked = true; });
             }
-
             document.getElementById('appAdminType').value = app.adminType || "";
             document.getElementById('resourceType').value = app.resourceType || 'url'; handleResourceTypeChange();
             if(app.resourceType === 'image' && app.link.startsWith('data:')) { document.getElementById('imagePreview').src = app.link; document.getElementById('imagePreviewBox').style.display = 'block'; document.getElementById('appFileBase64').value = app.link; } else { document.getElementById('appLink').value = app.link; }
             document.getElementById('appPainPoint').value = app.painPoint; document.getElementById('appPrompt').value = app.promptText || ""; 
-            
             document.getElementById('appRemarks').value = app.remarks || "";
-
-            // Reset tags first
             document.querySelectorAll('input[name="appTag"]').forEach(cb => cb.checked = false); 
-            // Only populate tags if it's teaching (though admin shouldn't have them, this is a safeguard)
             if(app.category !== 'admin' && app.tags && Array.isArray(app.tags)) {
-                app.tags.forEach(tag => {
-                    const cb = document.querySelector(`input[name="appTag"][value="${tag}"]`);
-                    if(cb) cb.checked = true;
-                });
+                app.tags.forEach(tag => { const cb = document.querySelector(`input[name="appTag"][value="${tag}"]`); if(cb) cb.checked = true; });
             }
-
             const btn = document.getElementById('submitBtn'); btn.innerText = "確認更新"; btn.classList.replace('btn-primary', 'btn-success'); document.getElementById('cancelBtn').style.display = 'block'; document.getElementById('deleteBtn').style.display = 'block'; 
         }
         
@@ -951,10 +960,7 @@
         
         function resetForm(shouldRedirect = false) {
             document.getElementById('editModeId').value = ""; document.querySelectorAll('input, textarea').forEach(i => i.value = ""); 
-            
-            document.getElementById('appCategory').value = 'teaching'; // Default back to teaching
-            handleCategoryChange(); // Reset UI state
-
+            document.getElementById('appCategory').value = 'teaching'; handleCategoryChange();
             document.querySelectorAll('input[name="appTag"]').forEach(cb => cb.checked = false);
             document.querySelectorAll('input[name="crossSub"]').forEach(cb => cb.checked = false); document.getElementById('crossSubjectSection').style.display = 'none';
             document.getElementById('imagePreviewBox').style.display = 'none'; document.getElementById('appFileBase64').value = ""; document.getElementById('resourceType').value = "url"; handleResourceTypeChange();
