@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Hub | 資源展示庫 V3.3</title>
+    <title>AI Hub | 資源展示庫 V3.4</title>
     
     <link rel="icon" href="https://img.icons8.com/fluency/96/artificial-intelligence.png" type="image/png">
 
@@ -14,7 +14,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     
     <style>
-        /* CSS V3.3 - Type Badge & Favicon Update */
+        /* CSS V3.4 - Prompt Box Height Update */
         :root {
             --primary: #2c3e50;
             --accent: #00d2ff;
@@ -96,7 +96,7 @@
         .card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         .card-content { padding: 20px; flex: 1; display: flex; flex-direction: column; }
         
-        /* 2. 新增：左上角檔案類型標籤樣式 */
+        /* Type Badge */
         .type-badge {
             position: absolute;
             top: 10px;
@@ -113,7 +113,7 @@
             gap: 5px;
             backdrop-filter: blur(4px);
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            pointer-events: none; /* 讓點擊穿透 */
+            pointer-events: none;
         }
 
         .app-preview { width: 100%; height: 180px; object-fit: contain; background-color: #e0e0e0; border-bottom: 1px solid #ddd; display: block; }
@@ -127,6 +127,23 @@
         
         .remark-alert { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 10px; border-radius: 6px; font-size: 0.85rem; margin: 10px 0; display: flex; align-items: flex-start; }
         .remark-icon { margin-right: 6px; font-size: 1rem; }
+
+        /* V3.4 New: Prompt Content Box Style */
+        .prompt-content-display {
+            background: #2c3e50;
+            color: #2ecc71;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            margin: 15px 0;
+            min-height: 350px; /* V3.4: Increased Height */
+            max-height: 600px;
+            overflow-y: auto;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            border: 1px solid #1a252f;
+        }
 
         .rating-badge-container { display: flex; gap: 10px; margin: 15px 0; }
         .badge-rate { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 5px 10px; border-radius: 8px; color: white; font-weight: bold; min-width: 60px; }
@@ -203,7 +220,7 @@
 
     <div id="loginModal">
         <div class="login-box">
-            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V3.3</h2>
+            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V3.4</h2>
             <p style="color:#7f8c8d; margin-bottom:20px;">請使用校方派發的帳號登入</p>
             <input type="email" id="loginEmail" class="form-control" placeholder="Email" style="margin-bottom:10px;">
             <input type="password" id="loginPass" class="form-control" placeholder="Password" style="margin-bottom:20px;">
@@ -218,7 +235,7 @@
         <div class="sidebar-header">
             <div class="school-name">香海正覺蓮社<br>佛教正覺蓮社學校</div>
             <h2 class="app-name">BCK-AI Hub</h2>
-            <div class="version-tag">V3.3 UI Update</div>
+            <div class="version-tag">V3.4 UI Update</div>
         </div>
 
         <div id="menu-dashboard" class="menu-item active" onclick="showPage('dashboard')"><span class="menu-icon">📊</span> 數據總覽</div>
@@ -493,7 +510,7 @@
 
         const tagKeywords = ["AI 生成", "評估工具", "課堂管理", "備課輔助", "差異化教學", "學生自學", "專題研習", "遊戲化學習", "行政效率", "其他"];
 
-        // 3. 資源類型對照表 (用於顯示徽章)
+        // Resource Type Config
         const resourceTypeConfig = {
             'url': { icon: '🌐', label: '網頁', color: '#3498db' },
             'image': { icon: '🖼️', label: '圖片', color: '#9b59b6' },
@@ -643,7 +660,7 @@
                     let previewHtml = '';
                     const type = app.resourceType || 'url';
                     
-                    // 4. Generate Type Badge
+                    // Generate Type Badge
                     const typeInfo = resourceTypeConfig[type] || resourceTypeConfig['url'];
                     const typeBadgeHtml = `<div class="type-badge">${typeInfo.icon} ${typeInfo.label}</div>`;
 
@@ -700,7 +717,8 @@
 
                     let html = `
                         <div class="card ${cardClass}" data-cat="${app.category}" data-sub="${app.subject}">
-                            ${typeBadgeHtml} ${previewHtml}
+                            ${typeBadgeHtml} 
+                            ${previewHtml}
                             <div class="card-content">
                                 <h3 style="margin-top:0">${app.title} ${editBtn}</h3>
                                 <div style="font-size:0.85rem; color:#7f8c8d; margin-bottom:10px;">
@@ -834,7 +852,17 @@
             prompts.forEach(p => {
                 let dateStr = "(舊資料)";
                 try { if(p.timestamp) dateStr = new Date(p.timestamp).toLocaleString('zh-HK', { timeZone: 'Asia/Hong_Kong', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }); } catch(e){}
-                container.innerHTML += `<div class="card"><div class="card-content"><h3>${p.title} <small style="font-size:0.8rem; font-weight:normal">${p.author} • ${dateStr}</small></h3><p><strong>🎯 用途：</strong>${p.purpose}</p><div style="background:#2c3e50; color:#2ecc71; padding:15px; border-radius:8px; font-family:monospace; margin:10px 0; max-height:150px; overflow-y:auto; font-size:0.9rem;">${p.content}</div><button class="btn btn-outline" onclick="navigator.clipboard.writeText(\`${p.content}\`);alert('已複製！')">複製指令</button></div></div>`;
+                
+                // V3.4 Updated: Used css class 'prompt-content-display'
+                container.innerHTML += `
+                <div class="card">
+                    <div class="card-content">
+                        <h3>${p.title} <small style="font-size:0.8rem; font-weight:normal">${p.author} • ${dateStr}</small></h3>
+                        <p><strong>🎯 用途：</strong>${p.purpose}</p>
+                        <div class="prompt-content-display">${p.content}</div>
+                        <button class="btn btn-outline" onclick="navigator.clipboard.writeText(\`${p.content}\`);alert('已複製！')">複製指令</button>
+                    </div>
+                </div>`;
             });
         }
 
