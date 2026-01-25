@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Hub | 資源展示庫 V3.4</title>
+    <title>AI Hub | 資源展示庫 V3.5</title>
     
     <link rel="icon" href="https://img.icons8.com/fluency/96/artificial-intelligence.png" type="image/png">
 
@@ -14,7 +14,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     
     <style>
-        /* CSS V3.4 - Prompt Box Height Update */
         :root {
             --primary: #2c3e50;
             --accent: #00d2ff;
@@ -128,7 +127,7 @@
         .remark-alert { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 10px; border-radius: 6px; font-size: 0.85rem; margin: 10px 0; display: flex; align-items: flex-start; }
         .remark-icon { margin-right: 6px; font-size: 1rem; }
 
-        /* V3.4 New: Prompt Content Box Style */
+        /* Prompt Content Box Style */
         .prompt-content-display {
             background: #2c3e50;
             color: #2ecc71;
@@ -136,7 +135,7 @@
             border-radius: 8px;
             font-family: 'Consolas', 'Monaco', monospace;
             margin: 15px 0;
-            min-height: 350px; /* V3.4: Increased Height */
+            min-height: 350px;
             max-height: 600px;
             overflow-y: auto;
             font-size: 0.95rem;
@@ -220,7 +219,7 @@
 
     <div id="loginModal">
         <div class="login-box">
-            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V3.4</h2>
+            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V3.5</h2>
             <p style="color:#7f8c8d; margin-bottom:20px;">請使用校方派發的帳號登入</p>
             <input type="email" id="loginEmail" class="form-control" placeholder="Email" style="margin-bottom:10px;">
             <input type="password" id="loginPass" class="form-control" placeholder="Password" style="margin-bottom:20px;">
@@ -235,7 +234,7 @@
         <div class="sidebar-header">
             <div class="school-name">香海正覺蓮社<br>佛教正覺蓮社學校</div>
             <h2 class="app-name">BCK-AI Hub</h2>
-            <div class="version-tag">V3.4 UI Update</div>
+            <div class="version-tag">V3.5 Prompt Edit</div>
         </div>
 
         <div id="menu-dashboard" class="menu-item active" onclick="showPage('dashboard')"><span class="menu-icon">📊</span> 數據總覽</div>
@@ -853,14 +852,17 @@
                 let dateStr = "(舊資料)";
                 try { if(p.timestamp) dateStr = new Date(p.timestamp).toLocaleString('zh-HK', { timeZone: 'Asia/Hong_Kong', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }); } catch(e){}
                 
-                // V3.4 Updated: Used css class 'prompt-content-display'
+                // V3.5 New Logic: Check ownership for edit button
+                const isAuthor = (p.author === currentUser.name) || (p.authorEmail && p.authorEmail === currentUser.email);
+                const editBtn = isAuthor ? `<button class="btn btn-outline" style="font-size:0.7rem; float:right; margin-left:10px;" onclick='editPrompt(${JSON.stringify(p)})'>✏️ 編輯</button>` : '';
+
                 container.innerHTML += `
                 <div class="card">
                     <div class="card-content">
-                        <h3>${p.title} <small style="font-size:0.8rem; font-weight:normal">${p.author} • ${dateStr}</small></h3>
+                        <h3>${p.title} ${editBtn} <br><small style="font-size:0.8rem; font-weight:normal; color:#7f8c8d">${p.author} • ${dateStr}</small></h3>
                         <p><strong>🎯 用途：</strong>${p.purpose}</p>
                         <div class="prompt-content-display">${p.content}</div>
-                        <button class="btn btn-outline" onclick="navigator.clipboard.writeText(\`${p.content}\`);alert('已複製！')">複製指令</button>
+                        <button class="btn btn-outline" onclick="navigator.clipboard.writeText(\`${p.content.replace(/`/g, "\\`")}\`);alert('已複製！')">複製指令</button>
                     </div>
                 </div>`;
             });
