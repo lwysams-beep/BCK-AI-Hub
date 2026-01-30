@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Hub | V4.7 Final Dashboard</title>
+    <title>AI Hub | V5.0 管理與訪客版</title>
     
     <link rel="icon" href="https://img.icons8.com/fluency/96/artificial-intelligence.png" type="image/png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -14,6 +14,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     
     <style>
+        /* 核心樣式 (基於 V3.5) */
         :root {
             --primary: #2c3e50;
             --accent: #00d2ff;
@@ -24,72 +25,68 @@
             --danger: #e74c3c;
             --admin-color: #8e44ad;
             --value-edu-color: #e91e63;
-            --forum-color: #6c5ce7;
             --terminal-bg: #1e1e1e;
             --terminal-text: #00ff00;
         }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f4f7f6; display: flex; height: 100vh; overflow-x: hidden; }
         
-        /* Sidebar */
+        /* 漸變側邊欄 */
         .sidebar { width: 260px; background: linear-gradient(135deg, #141e30 0%, #243b55 100%); color: white; display: flex; flex-direction: column; padding: 20px; box-shadow: 4px 0 15px rgba(0,0,0,0.1); z-index: 1001; flex-shrink: 0; white-space: nowrap; transition: all 0.3s; }
-        body.desktop-collapsed .sidebar { margin-left: -300px; }
         .main-content { flex: 1; padding: 30px; overflow-y: auto; position: relative; width: 100%; transition: margin 0.3s; }
         
-        /* Sidebar Elements */
-        .sidebar-header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 15px; }
-        .school-name { font-size: 0.85rem; opacity: 0.8; letter-spacing: 0.5px; margin-bottom: 5px; font-weight: 500;}
-        .app-name { font-size: 1.4rem; margin: 0; font-weight: bold; background: -webkit-linear-gradient(#00d2ff, #3a7bd5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .version-tag { font-size: 0.7rem; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 10px; margin-top: 5px; display: inline-block; color: #bdc3c7; }
-        .menu-item { padding: 12px 15px; cursor: pointer; border-radius: 8px; margin-bottom: 5px; transition: 0.2s; display: flex; align-items: center; border: 1px solid transparent; }
-        .menu-item:hover { background: rgba(255,255,255,0.1); transform: translateX(5px); }
-        .menu-item.active { background: rgba(255,255,255,0.15); border-left: 4px solid var(--accent); }
-        .menu-icon { margin-right: 10px; width: 20px; text-align: center; }
-        .user-info { margin-top: auto; padding-top:20px; border-top:1px solid rgba(255,255,255,0.2); font-size: 0.9rem; }
-
-        /* Mobile */
+        /* 手機適配 */
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
         .header-bar { display: flex; align-items: center; margin-bottom: 20px; }
         .menu-toggle-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--primary); padding: 5px 15px 5px 0; outline: none; }
-        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
         @media (max-width: 768px) {
             body { flex-direction: column; }
             .sidebar { position: fixed; top: 0; left: 0; height: 100%; transform: translateX(-100%); width: 260px; }
             .sidebar.active { transform: translateX(0); }
             .sidebar-overlay.active { display: block; }
             .main-content { padding: 15px; }
+            .charts-row, .leaderboard-section { grid-template-columns: 1fr !important; }
         }
 
-        /* General UI */
-        .page { display: none; animation: fadeIn 0.4s; }
-        .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: 0.2s; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; filter: grayscale(1); }
-        .btn-primary { background: linear-gradient(135deg, #3a7bd5, #00d2ff); color: white; }
-        .btn-forum { background-color: var(--forum-color); color: white; }
-        .btn-outline { border: 1px solid #ccc; background: white; color: #555; }
-        .btn-xs { padding: 4px 8px; font-size: 0.8rem; }
-        .btn-round { border-radius: 50px; }
-        .btn-all { background: #5d6d7e; color: white; }
-        .form-control { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px; box-sizing: border-box; }
-        .form-group { margin-bottom: 18px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #34495e; }
+        /* 側邊欄元素 */
+        .sidebar-header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 15px; }
+        .school-name { font-size: 0.85rem; opacity: 0.8; letter-spacing: 0.5px; margin-bottom: 5px; font-weight: 500;}
+        .app-name { font-size: 1.4rem; margin: 0; font-weight: bold; background: -webkit-linear-gradient(#00d2ff, #3a7bd5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .version-tag { font-size: 0.7rem; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 10px; margin-top: 5px; display: inline-block; color: #bdc3c7; }
+        
+        .menu-item { padding: 12px 15px; cursor: pointer; border-radius: 8px; margin-bottom: 5px; transition: 0.2s; display: flex; align-items: center; border: 1px solid transparent; }
+        .menu-item:hover { background: rgba(255,255,255,0.1); transform: translateX(5px); }
+        .menu-item.active { background: rgba(255,255,255,0.15); border-left: 4px solid var(--accent); }
+        .menu-icon { margin-right: 10px; width: 20px; text-align: center; }
+        .user-info { margin-top: auto; padding-top:20px; border-top:1px solid rgba(255,255,255,0.2); font-size: 0.9rem; }
 
-        /* DASHBOARD V4.7 (Vertical Layout) */
+        /* 公告欄樣式 (V5.0 新增) */
+        .announcement-box { 
+            background: #fff3cd; 
+            border: 1px solid #ffeeba; 
+            color: #856404; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-bottom: 25px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            animation: fadeIn 0.5s;
+        }
+
+        /* 儀表板 */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
         .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; border-bottom: 4px solid var(--accent-dark); }
         .stat-number { font-size: 2.5rem; font-weight: 800; color: var(--primary); margin: 10px 0; }
         
-        .charts-container { display: flex; flex-direction: column; gap: 30px; margin-bottom: 30px; }
+        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
         .chart-box { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-height: 400px; display:flex; flex-direction:column; }
-        canvas { flex: 1; max-height: 350px; width: 100%; }
+        canvas { flex: 1; max-height: 320px; width: 100%; }
 
-        /* Announcement Box */
-        .announcement-box { background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 15px; border-radius: 8px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-start; }
-
-        /* Leaderboard V4.7 */
-        .leaderboard-section { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; margin-top: 30px; }
+        /* 排行榜 (V5.0 新增優質榜) */
+        .leaderboard-section { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
         .leaderboard-box { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .leaderboard-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .leaderboard-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .leaderboard-table th { text-align: left; padding: 10px; color: #7f8c8d; font-size: 0.9rem; border-bottom: 2px solid #eee; }
         .leaderboard-table td { padding: 12px 10px; border-bottom: 1px solid #f5f5f5; font-size: 0.95rem; }
         .rank-badge { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; background: #eee; color: #555; margin-right: 5px; }
@@ -97,49 +94,41 @@
         .rank-2 { background: #C0C0C0; color: #555; }
         .rank-3 { background: #cd7f32; color: #fff; }
 
-        /* RESOURCE CARDS V3.5 Style + V4.7 Fixes */
+        /* 資源卡片 */
         .resource-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
         .card { background: white; border-radius: 12px; padding: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: transform 0.2s; overflow: hidden; display: flex; flex-direction: column; border: 1px solid #eee; cursor: pointer; }
         .card:hover { transform: translateY(-5px); box-shadow: 0 12px 20px rgba(0,0,0,0.1); border-color: var(--accent); }
-        
         .card-preview-area { width: 100%; height: 160px; position: relative; overflow: hidden; background: #f0f0f0; border-bottom: 1px solid #eee; }
         .card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
-        .card:hover .card-img { transform: scale(1.05); }
         .card-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
-        .ph-icon { font-size: 3.5rem; margin-bottom: 5px; opacity: 0.9; text-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .ph-text { font-size: 0.9rem; font-weight: 500; opacity: 0.9; text-shadow: 0 1px 3px rgba(0,0,0,0.2); letter-spacing: 1px; }
-        
-        /* Gradients */
-        .bg-teaching { background: linear-gradient(135deg, #3a7bd5, #00d2ff); }
-        .bg-admin { background: linear-gradient(135deg, #8e44ad, #c39bd3); }
-        .bg-value { background: linear-gradient(135deg, #e91e63, #ff8a80); }
-
+        .ph-icon { font-size: 3.5rem; margin-bottom: 5px; opacity: 0.9; }
         .card-content { padding: 15px; flex: 1; display: flex; flex-direction: column; }
-        .card-title { margin: 0 0 5px 0; font-size: 1.15rem; color: #2c3e50; font-weight: 700; line-height: 1.3; }
+        .card-title { margin: 0 0 5px 0; font-size: 1.15rem; color: #2c3e50; font-weight: 700; }
         .card-meta { font-size: 0.8rem; color: #95a5a6; margin-bottom: 10px; display: flex; justify-content: space-between; }
-        
         .tag-row { margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 5px; }
         .tag { padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; background: #eee; color: #555; }
         .tag-5c { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
-        .tag-kw { background: #f4f6f7; color: #5d6d7e; border: 1px solid #d5dbdb; }
+        .card-desc { font-size: 0.9rem; color: #555; flex: 1; margin-bottom: 10px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 
-        .card-rating-mini { font-size: 0.85rem; color: #f39c12; margin-top: auto; display: flex; align-items: center; gap: 5px; font-weight: bold; border-top: 1px solid #f0f0f0; padding-top: 10px; }
+        /* Prompts (黑底綠字) */
+        .prompt-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .prompt-content-box { background: var(--terminal-bg); color: var(--terminal-text); padding: 15px; font-family: 'Courier New', monospace; font-size: 0.95rem; border-radius: 6px; margin-bottom: 15px; border: 1px solid #333; white-space: pre-wrap; max-height: 250px; overflow-y: auto; }
 
-        /* PROMPTS V4.7 */
-        .prompt-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #eee; display:flex; flex-direction:column;}
-        .prompt-meta { display: flex; justify-content: space-between; margin-bottom: 10px; color: #888; font-size: 1rem; } /* Larger font */
-        .prompt-content-box { 
-            background: var(--terminal-bg); color: var(--terminal-text); 
-            padding: 15px; font-family: 'Courier New', monospace; 
-            font-size: 0.95rem; border-radius: 6px; 
-            margin-bottom: 15px; border: 1px solid #333; 
-            white-space: pre-wrap; max-height: 350px; overflow-y: auto; 
-        }
+        /* 通用元件 */
+        .page { display: none; animation: fadeIn 0.4s; }
+        .page.active { display: block; }
+        .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-primary { background: linear-gradient(135deg, #3a7bd5, #00d2ff); color: white; }
+        .btn-success { background: linear-gradient(135deg, #11998e, #38ef7d); color: white; }
+        .btn-admin { background-color: var(--admin-color); color: white; }
+        .btn-value { background-color: var(--value-edu-color); color: white; }
+        .btn-outline { border: 1px solid #ccc; background: white; color: #555; }
+        .btn-xs { padding: 4px 8px; font-size: 0.8rem; }
+        .form-control { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px; box-sizing: border-box; }
+        .form-group { margin-bottom: 18px; }
 
-        /* FORUM */
-        .forum-post { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
-        
-        /* APP DETAIL MODAL */
+        /* 詳情視窗 */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: none; justify-content: center; align-items: center; backdrop-filter: blur(3px); }
         .modal-container { background: white; width: 90%; max-width: 900px; height: 90vh; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; animation: slideUp 0.3s; box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
         .modal-header { padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: #fafafa; }
@@ -149,23 +138,22 @@
         .rating-section { background: #f9f9f9; padding: 20px; border-radius: 10px; margin-top: 20px; }
         .star-input span { cursor: pointer; font-size: 1.5rem; color: #ccc; transition: 0.2s; }
         .star-input span.active { color: #f39c12; }
-        
-        /* Checkbox Grid */
-        .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 5px; }
-        .checkbox-item { display: flex; align-items: center; font-size: 0.9rem; background: #fff; padding: 8px; border: 1px solid #ddd; border-radius: 6px; }
-        .checkbox-item input { margin-right: 8px; }
+        .guest-lock { opacity: 0.5; pointer-events: none; position: relative; } /* 訪客鎖定樣式 */
+
+        #loginModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 30, 48, 0.95); display: flex; justify-content: center; align-items: center; z-index: 3000; }
     </style>
 </head>
 <body>
 
-    <div id="loginModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(20,30,48,0.95); display:flex; justify-content:center; align-items:center; z-index:3000;">
+    <!-- 登入畫面 -->
+    <div id="loginModal">
         <div style="background:white; padding:40px; border-radius:15px; width:340px; text-align:center;">
-            <h2 style="color:var(--primary);">BCK-AI Hub V4.7</h2>
-            <p style="color:#7f8c8d;">校方帳號或訪客登入</p>
-            <input type="email" id="loginEmail" class="form-control" placeholder="Email">
-            <input type="password" id="loginPass" class="form-control" placeholder="Password">
+            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V5.0</h2>
+            <p style="color:#7f8c8d; margin-bottom:20px;">校方帳號或訪客登入</p>
+            <input type="email" id="loginEmail" class="form-control" placeholder="Email (老師專用)">
+            <input type="password" id="loginPass" class="form-control" placeholder="Password / 訪客密碼 (26754411!)">
             <button id="loginBtn" class="btn btn-primary" style="width:100%" onclick="handleLogin()">登入系統</button>
-            <p id="loginMsg" style="color:red; font-size:0.9rem; margin-top:10px;"></p>
+            <p id="loginMsg" style="color:red; font-size:0.9rem; margin-top:10px; min-height:20px;"></p>
         </div>
     </div>
 
@@ -173,14 +161,13 @@
 
     <div class="sidebar">
         <div class="sidebar-header">
-            <div style="font-size:0.85rem; opacity:0.8;">香海正覺蓮社<br>佛教正覺蓮社學校</div>
+            <div class="school-name">香海正覺蓮社<br>佛教正覺蓮社學校</div>
             <h2 class="app-name">BCK-AI Hub</h2>
-            <div style="font-size:0.7rem; background:rgba(255,255,255,0.1); border-radius:10px; display:inline-block; padding:2px 8px; margin-top:5px;">V4.7 Final</div>
+            <div class="version-tag">V5.0 Admin+Guest</div>
         </div>
         <div id="menu-dashboard" class="menu-item active" onclick="showPage('dashboard')"><span class="menu-icon">📊</span> 數據總覽</div>
         <div id="menu-apps" class="menu-item" onclick="showPage('apps')"><span class="menu-icon">📱</span> 資源展示庫</div>
         <div id="menu-prompts" class="menu-item" onclick="showPage('prompts')"><span class="menu-icon">💡</span> 好Prompt 分享</div>
-        <div id="menu-forum" class="menu-item" onclick="showPage('forum')"><span class="menu-icon">💬</span> 教師討論區</div>
         <div id="menu-upload" class="menu-item" onclick="showPage('upload')"><span class="menu-icon">📤</span> 上載分享</div>
         <div class="user-info">
             <p>👋 <span id="currentUserDisplay">...</span></p>
@@ -198,6 +185,7 @@
         <div id="dashboard" class="page active">
             <h1 style="margin-bottom:20px;">平台數據儀表板</h1>
             
+            <!-- V5.0 公告欄 -->
             <div id="announcementContainer" style="display:none;">
                 <div class="announcement-box">
                     <div>
@@ -208,41 +196,40 @@
             </div>
 
             <div class="stats-grid">
-                <div class="stat-card" style="border-bottom-color: var(--accent-dark);"><div class="stat-number" id="totalAll">0</div><div>總資源</div></div>
+                <div class="stat-card" style="border-bottom-color: var(--accent-dark);"><div class="stat-number" id="totalApps">0</div><div>學教評資源</div></div>
                 <div class="stat-card" style="border-bottom-color: var(--admin-color);"><div class="stat-number" id="totalAdmin">0</div><div>行政資源</div></div>
-                <div class="stat-card" style="border-bottom-color: var(--accent);"><div class="stat-number" id="totalTeaching">0</div><div>學教評資源</div></div>
                 <div class="stat-card" style="border-bottom-color: var(--warning);"><div class="stat-number" id="totalPrompts">0</div><div>Prompt 指令</div></div>
+                <div class="stat-card" style="border-bottom-color: var(--success);"><div class="stat-number" id="activeTeachers">0</div><div>參與老師</div></div>
             </div>
 
-            <!-- Vertical Charts -->
-            <div class="charts-container">
+            <div class="charts-row">
                 <div class="chart-box">
-                    <h3 style="color:var(--accent-dark); margin-top:0; border-bottom:1px solid #eee; padding-bottom:10px;">🎓 學科分佈 (Pie Chart)</h3>
+                    <h3 style="color:var(--accent-dark); margin-top:0;">🎓 學科分佈</h3>
                     <div style="flex:1; position:relative"><canvas id="subjectChart"></canvas></div>
                 </div>
                 <div class="chart-box">
-                    <h3 style="color:var(--admin-color); margin-top:0; border-bottom:1px solid #eee; padding-bottom:10px;">📂 行政分類 (Bar Chart)</h3>
+                    <h3 style="color:var(--admin-color); margin-top:0;">📂 行政分類</h3>
                     <div style="flex:1; position:relative"><canvas id="adminChart"></canvas></div>
                 </div>
-                <div class="chart-box">
-                    <h3 style="color:#2ecc71; margin-top:0;">🌟 5C+ 素養分佈</h3>
-                    <div style="flex:1; max-height:350px;"><canvas id="fiveCChart"></canvas></div>
-                </div>
+            </div>
+            <div class="chart-box" style="margin-bottom:20px;">
+                <h3 style="color:#2ecc71; margin-top:0;">🌟 5C+ 素養分佈</h3>
+                <div style="flex:1; max-height:300px;"><canvas id="fiveCChart"></canvas></div>
             </div>
 
-            <!-- Leaderboards -->
+            <!-- V5.0 雙排行榜 -->
             <div class="leaderboard-section">
                 <div class="leaderboard-box">
-                    <h3 style="margin-top:0; color:#d35400;">🏆 活躍貢獻排行榜 (綜合評分)</h3>
+                    <h3 style="margin-top:0; color:#d35400;">🏆 活躍貢獻排行榜</h3>
                     <table class="leaderboard-table" id="contributorTable">
-                        <thead><tr><th>排名</th><th>老師</th><th>貢獻</th><th>平均分</th><th>綜合分</th></tr></thead>
+                        <thead><tr><th>排名</th><th>老師</th><th>貢獻數</th></tr></thead>
                         <tbody></tbody>
                     </table>
                 </div>
                 <div class="leaderboard-box">
                     <h3 style="margin-top:0; color:#f1c40f;">⭐ 優質作品排行榜 (Top Rated)</h3>
                     <table class="leaderboard-table" id="topRatedTable">
-                        <thead><tr><th>排名</th><th>作品名稱</th><th>作者</th><th>評分</th></tr></thead>
+                        <thead><tr><th>排名</th><th>作品名稱</th><th>評分</th></tr></thead>
                         <tbody></tbody>
                     </table>
                 </div>
@@ -266,56 +253,54 @@
         <!-- PROMPTS PAGE -->
         <div id="prompts" class="page">
             <h1>好 Prompt 分享區</h1>
-            <div id="promptsContainer" class="resource-grid" style="grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));"></div>
-        </div>
-
-        <!-- FORUM PAGE -->
-        <div id="forum" class="page">
-            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-                <h1>💬 教師討論區</h1>
-                <button class="btn btn-forum" id="newPostBtn" onclick="openNewPostModal()">➕ 發起討論</button>
-            </div>
-            <div id="forumContainer"></div>
+            <div id="promptsContainer" class="resource-grid" style="grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));"></div>
         </div>
 
         <!-- UPLOAD PAGE -->
         <div id="upload" class="page">
             <h1>上載 / 編輯資源</h1>
             <div style="background:white; padding:30px; border-radius:12px; max-width:800px; margin:0 auto;">
-                <div class="form-group"><label>資源類型</label><select id="uploadType" class="form-control" onchange="toggleUploadForm()"><option value="app">上載作品</option><option value="prompt">純分享 AI Prompt</option></select></div>
-                
-                <div id="appForm">
-                    <div class="form-group"><label>作品名稱</label><input type="text" id="appTitle" class="form-control"></div>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-                        <div class="form-group"><label>分類</label><select id="appCategory" class="form-control" onchange="handleCatChange()"><option value="teaching">學教評</option><option value="admin">行政</option></select></div>
-                        <div class="form-group" id="subjGroup"><label>科目</label><select id="appSubject" class="form-control"><option>中文</option><option>英文</option><option>數學</option><option>常識/科學</option><option>人文</option><option>視藝</option><option>音樂</option><option>體育</option><option>圖書</option><option>普通話</option><option>佛學</option><option>科技</option><option>價值觀教育</option><option>跨課程</option></select></div>
-                        <div class="form-group" id="admGroup" style="display:none;"><label>行政類別</label><select id="appAdminType" class="form-control"><option>校務運作</option><option>文書處理</option><option>數據分析</option><option>資訊通訊</option><option>活動策劃</option><option>資源管理</option></select></div>
+                <!-- 訪客警告 -->
+                <div id="guestUploadMsg" style="display:none; background:#ffebee; color:#c0392b; padding:15px; border-radius:8px; text-align:center; font-weight:bold; margin-bottom:20px;">⚠️ 訪客模式：您沒有權限上載或修改資源。</div>
+
+                <div id="uploadFormContent">
+                    <input type="hidden" id="editModeId" value="">
+                    <div class="form-group"><label>資源類型</label><select id="uploadType" class="form-control" onchange="toggleUploadForm()"><option value="app">上載作品</option><option value="prompt">純分享 AI Prompt</option></select></div>
+                    
+                    <div id="appForm">
+                        <div class="form-group"><label>作品名稱</label><input type="text" id="appTitle" class="form-control"></div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                            <div class="form-group"><label>分類</label><select id="appCategory" class="form-control" onchange="handleCatChange()"><option value="teaching">學教評</option><option value="admin">行政</option></select></div>
+                            <div class="form-group" id="subjGroup"><label>科目</label><select id="appSubject" class="form-control" onchange="handleSubjChange()"><option>中文</option><option>英文</option><option>數學</option><option>常識/科學</option><option>人文</option><option>視藝</option><option>音樂</option><option>體育</option><option>圖書</option><option>普通話</option><option>佛學</option><option>科技</option><option>價值觀教育</option><option>跨課程</option></select><div id="crossSubSection" style="display:none; margin-top:5px;"><div id="crossSubChecks" class="checkbox-grid"></div></div></div>
+                            <div class="form-group" id="admGroup" style="display:none;"><label>行政類別</label><select id="appAdminType" class="form-control"><option>校務運作</option><option>文書處理</option><option>數據分析</option><option>資訊通訊</option><option>活動策劃</option><option>資源管理</option></select></div>
+                        </div>
+                        
+                        <div class="form-group" id="5cGroup">
+                            <label>🌟 5C+ 核心素養</label>
+                            <div class="checkbox-grid">
+                                <label><input type="checkbox" name="5c" value="Creativity"> Creativity</label>
+                                <label><input type="checkbox" name="5c" value="Critical Thinking"> Critical Thinking</label>
+                                <label><input type="checkbox" name="5c" value="Communication"> Communication</label>
+                                <label><input type="checkbox" name="5c" value="Collaboration"> Collaboration</label>
+                                <label><input type="checkbox" name="5c" value="Contribution"> Contribution</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group"><label>檔案類型</label><select id="resourceType" class="form-control" onchange="handleResType()"><option value="url">網頁連結</option><option value="image">圖片</option><option value="video">影片</option><option value="presentation">簡報</option><option value="worksheet">工作紙</option></select></div>
+                        <div class="form-group" id="urlGroup"><label>連結</label><input type="text" id="appLink" class="form-control"></div>
+                        <div class="form-group" id="fileGroup" style="display:none;"><label>上傳圖片</label><input type="file" id="appFile" class="form-control" accept="image/*"><input type="hidden" id="appFileBase64"></div>
+                        <div class="form-group"><label>解決了什麼難點？</label><input type="text" id="appPainPoint" class="form-control"></div>
+                        <div class="form-group"><label style="color:var(--danger)">⚠️ 特別備註</label><input type="text" id="appRemarks" class="form-control"></div>
                     </div>
                     
-                    <div class="form-group" id="5cGroup">
-                        <label>🌟 5C+ 核心素養 (可多選)</label>
-                        <div class="checkbox-grid">
-                            <label class="checkbox-item"><input type="checkbox" name="5c" value="Creativity"> Creativity (創意)</label>
-                            <label class="checkbox-item"><input type="checkbox" name="5c" value="Critical Thinking"> Critical Thinking (慎思明辨)</label>
-                            <label class="checkbox-item"><input type="checkbox" name="5c" value="Communication"> Communication (溝通)</label>
-                            <label class="checkbox-item"><input type="checkbox" name="5c" value="Collaboration"> Collaboration (協作)</label>
-                            <label class="checkbox-item"><input type="checkbox" name="5c" value="Citizenship"> Citizenship (公民素養)</label>
-                            <label class="checkbox-item"><input type="checkbox" name="5c" value="Character"> Character (品格)</label>
-                        </div>
+                    <div id="promptForm" style="display:none;">
+                        <div class="form-group"><label>主題</label><input type="text" id="promptTitle" class="form-control"></div>
+                        <div class="form-group"><label>內容 (黑底綠字)</label><textarea id="promptContent" class="form-control" rows="8"></textarea></div>
+                        <div class="form-group"><label>用途 🎯</label><input type="text" id="promptPurpose" class="form-control"></div>
                     </div>
-
-                    <div class="form-group"><label>檔案類型</label><select id="resourceType" class="form-control" onchange="handleResType()"><option value="url">網頁連結 (URL)</option><option value="image">圖片 (Image)</option><option value="video">影片</option><option value="presentation">簡報</option><option value="worksheet">工作紙</option></select></div>
-                    <div class="form-group" id="urlGroup"><label>連結</label><input type="text" id="appLink" class="form-control"></div>
-                    <div class="form-group" id="fileGroup" style="display:none;"><label>上傳圖片</label><input type="file" id="appFile" class="form-control" accept="image/*"><input type="hidden" id="appFileBase64"></div>
-                    <div class="form-group"><label>解決了什麼難點？</label><input type="text" id="appPainPoint" class="form-control"></div>
+                    <button id="submitBtn" class="btn btn-primary" style="width:100%; margin-top:20px;" onclick="submitUpload()">確認發布</button>
+                    <button id="cancelBtn" class="btn btn-outline" style="width:100%; margin-top:10px; display:none;" onclick="resetForm(true)">取消編輯</button>
                 </div>
-                
-                <div id="promptForm" style="display:none;">
-                    <div class="form-group"><label>主題</label><input type="text" id="promptTitle" class="form-control"></div>
-                    <div class="form-group"><label>內容</label><textarea id="promptContent" class="form-control" rows="8"></textarea></div>
-                    <div class="form-group"><label>用途</label><input type="text" id="promptPurpose" class="form-control"></div>
-                </div>
-                <button class="btn btn-primary" style="width:100%; margin-top:20px;" onclick="submitUpload()">確認發布</button>
             </div>
         </div>
     </div>
@@ -330,53 +315,71 @@
             <div class="modal-body">
                 <div>
                     <div id="modalAppPreview" style="width:100%; height:200px; background:#eee; border-radius:8px; margin-bottom:15px; overflow:hidden; display:flex; align-items:center; justify-content:center;"></div>
-                    <div style="margin-bottom:15px;"><span class="tag" id="modalAppAuthor"></span></div>
+                    <div style="margin-bottom:15px;"><span class="tag" id="modalAppAuthor"></span> <span class="tag" id="modalAppDate"></span></div>
                     <p id="modalAppDesc" style="color:#555; line-height:1.6;"></p>
                     <div id="modalAppTags" class="tag-row" style="margin-bottom:20px;"></div>
                     <a id="modalAppLink" href="#" target="_blank" class="btn btn-primary" style="width:100%; padding:15px;">🚀 開啟資源連結</a>
                 </div>
                 <div>
-                    <div class="rating-section">
+                    <!-- V5.0 Guest Lock -->
+                    <div id="ratingSection" class="rating-section">
                         <h4>📊 評分</h4>
                         <div style="margin-bottom:10px;"><label>易用度: <span id="usabilityVal">0</span>/5</label><div class="star-input" id="starUsability"><span onclick="rate(1,'u')">★</span><span onclick="rate(2,'u')">★</span><span onclick="rate(3,'u')">★</span><span onclick="rate(4,'u')">★</span><span onclick="rate(5,'u')">★</span></div></div>
                         <div><label>成效: <span id="effectiveVal">0</span>/5</label><div class="star-input" id="starEffective"><span onclick="rate(1,'e')">★</span><span onclick="rate(2,'e')">★</span><span onclick="rate(3,'e')">★</span><span onclick="rate(4,'e')">★</span><span onclick="rate(5,'e')">★</span></div></div>
                         <button class="btn btn-success btn-xs" style="margin-top:10px; width:100%" onclick="submitRating()">送出評分</button>
                     </div>
-                    <div class="comment-box">
+                    <div class="comment-box" style="margin-top:20px; border-top:1px solid #eee; padding-top:15px;">
                         <h4>💬 留言</h4>
                         <div id="commentList" style="max-height:200px; overflow-y:auto; margin-bottom:10px;"></div>
-                        <textarea id="newComment" class="form-control" rows="2" placeholder="寫下看法..."></textarea>
-                        <button class="btn btn-primary btn-xs" onclick="submitComment()">留言</button>
+                        <div id="commentInputArea">
+                            <textarea id="newComment" class="form-control" rows="2" placeholder="寫下看法..."></textarea>
+                            <button class="btn btn-primary btn-xs" onclick="submitComment()">留言</button>
+                        </div>
+                        <div id="guestMsg" style="display:none; color:#999; text-align:center;">訪客模式無法評分或留言</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Forum & Post Modals (Omitted for brevity, assumed standard) -->
-    <div id="forumModal" class="modal-overlay"><div class="modal-container" style="max-width:600px;"><div style="padding:20px;"><h3 id="forumTitle"></h3><button style="float:right" onclick="document.getElementById('forumModal').style.display='none'">✕</button></div><div id="forumContent" style="padding:20px;overflow-y:auto;"></div><div style="padding:20px;"><textarea id="forumReply" class="form-control"></textarea><button onclick="submitForumReply()" class="btn btn-forum">回覆</button></div></div></div>
-    <div id="newPostOverlay" class="modal-overlay"><div class="modal-container" style="max-width:600px;padding:20px;height:auto;"><h3>新討論</h3><input id="postTitle" class="form-control"><textarea id="postContent" class="form-control" rows="4"></textarea><button onclick="submitPost()" class="btn btn-forum">發布</button><button onclick="document.getElementById('newPostOverlay').style.display='none'" class="btn btn-outline">取消</button></div></div>
-
     <script>
+        // --- Config ---
         const firebaseConfig = { apiKey: "AIzaSyBPRN5_vnvMOPAR0fTVaZoqM57ffIGZOQU", authDomain: "bck-ai-hub.firebaseapp.com", projectId: "bck-ai-hub", storageBucket: "bck-ai-hub.firebasestorage.app", messagingSenderId: "1010987556331", appId: "1:1010987556331:web:07dac81847056ae7520dae" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
         
-        let currentUser=null, currentAppId=null, currentRating={u:0,e:0}, currentForumId=null;
+        let currentUser=null, currentAppId=null, currentRating={u:0,e:0};
         const teacherDirectory = { "lwysams@bcklas.edu.hk": "穎", "slssams@bcklas.edu.hk": "珊", "ckysams@bcklas.edu.hk": "徐", "cymsams@bcklas.edu.hk": "文", "lysams@bcklas.edu.hk": "燕", "hhysams@bcklas.edu.hk": "侯", "scysams@bcklas.edu.hk": "蘇", "ccwsams@bcklas.edu.hk": "瑋", "ynysams@bcklas.edu.hk": "楊", "csysams@bcklas.edu.hk": "淑", "dspsams@bcklas.edu.hk": "丁", "cherry@bcklas.edu.hk": "Cherry", "lslsams@bcklas.edu.hk": "鈴", "cpy2sams@bcklas.edu.hk": "容", "lsysams@bcklas.edu.hk": "呂", "twksams@bcklas.edu.hk": "慧", "wpwsams@bcklas.edu.hk": "榮", "skysams@bcklas.edu.hk": "兒", "cym2sams@bcklas.edu.hk": "綺", "swysams@bcklas.edu.hk": "沈", "whwsams@bcklas.edu.hk": "馨", "ywysams@bcklas.edu.hk": "俞" };
         const ADMIN_EMAIL = "lwysams@bcklas.edu.hk";
+        const GUEST_PASS = "26754411!";
+        
+        const subList=["中文","英文","數學","常識/科學","人文","視藝","音樂","體育","圖書","普通話","佛學","科技","價值觀教育"];
+        const adminCols = {"校務運作":"#3498db","文書處理":"#9b59b6","數據分析":"#2ecc71","資訊通訊":"#e67e22","活動策劃":"#e74c3c","資源管理":"#f1c40f"};
+        const subCols = {"中文":"#e74c3c","英文":"#3498db","數學":"#f39c12","常識/科學":"#27ae60","人文":"#8e44ad","視藝":"#e91e63","音樂":"#1abc9c","體育":"#34495e","圖書":"#d35400","普通話":"#c0392b","佛學":"#f1c40f","科技":"#16a085","價值觀教育":"#e91e63","跨課程":"#7f8c8d"};
+
+        // --- Init ---
+        subList.forEach(s => document.getElementById('crossSubChecks').innerHTML += `<label><input type="checkbox" value="${s}"> ${s}</label>`);
 
         auth.onAuthStateChanged(u => {
-            if(u){ currentUser = { name: teacherDirectory[u.email]||u.email.split('@')[0], email: u.email, uid: u.uid }; document.getElementById('loginModal').style.display='none'; initApp(); }
-            else { document.getElementById('loginModal').style.display='flex'; }
+            if(u){ currentUser={name:teacherDirectory[u.email]||u.email.split('@')[0], email:u.email, uid:u.uid, isGuest:false}; document.getElementById('loginModal').style.display='none'; initApp(); }
+            else if(!currentUser?.isGuest) document.getElementById('loginModal').style.display='flex';
         });
 
-        function handleLogin(){ auth.signInWithEmailAndPassword(document.getElementById('loginEmail').value, document.getElementById('loginPass').value).catch(e=>document.getElementById('loginMsg').innerText=e.message); }
+        function handleLogin(){
+            const e=document.getElementById('loginEmail').value, p=document.getElementById('loginPass').value;
+            if(p===GUEST_PASS){ currentUser={name:"訪客 (Guest)", isGuest:true}; document.getElementById('loginModal').style.display='none'; initApp(); return; }
+            auth.signInWithEmailAndPassword(e,p).catch(err=>document.getElementById('loginMsg').innerText=err.message);
+        }
         function logout(){ auth.signOut().then(()=>location.reload()); }
-        
+
         function initApp(){
             document.getElementById('currentUserDisplay').innerText = currentUser.name;
+            if(currentUser.isGuest) {
+                document.getElementById('menu-upload').style.display='none'; // Hide upload menu for guest
+                document.getElementById('uploadFormContent').style.display='none';
+                document.getElementById('guestUploadMsg').style.display='block';
+            }
             if(currentUser.email===ADMIN_EMAIL) document.getElementById('editAnnouncementBtn').style.display='inline-block';
             loadData(); loadAnnouncement();
         }
@@ -392,158 +395,216 @@
         async function loadData(){
             const apps = (await db.collection('apps').orderBy('timestamp','desc').get()).docs.map(d=>({id:d.id,...d.data()}));
             const prompts = (await db.collection('prompts').orderBy('timestamp','desc').get()).docs.map(d=>({id:d.id,...d.data()}));
-            const posts = (await db.collection('posts').orderBy('timestamp','desc').get()).docs.map(d=>({id:d.id,...d.data()}));
-            renderApps(apps); renderPrompts(prompts); renderForum(posts); renderDashboard(apps,prompts);
+            renderApps(apps); renderPrompts(prompts); renderDashboard(apps,prompts);
         }
 
+        // --- Render Functions ---
         function renderDashboard(apps, prompts){
-            const teachingApps = apps.filter(a=>a.category==='teaching');
-            const adminApps = apps.filter(a=>a.category==='admin');
+            const tApps = apps.filter(a=>a.category==='teaching');
+            const aApps = apps.filter(a=>a.category==='admin');
             
-            // 1. Stats Update (Corrected)
-            document.getElementById('totalAll').innerText = apps.length + prompts.length; // Total Resources
-            document.getElementById('totalAdmin').innerText = adminApps.length;
-            document.getElementById('totalTeaching').innerText = teachingApps.length;
+            document.getElementById('totalApps').innerText = apps.length + prompts.length;
+            document.getElementById('totalAdmin').innerText = aApps.length;
+            document.getElementById('totalTeaching').innerText = tApps.length;
             document.getElementById('totalPrompts').innerText = prompts.length;
-            document.getElementById('activeTeachers').innerText = new Set([...apps.map(a=>a.author),...prompts.map(p=>p.author)]).size;
+            document.getElementById('activeTeachers').innerText = new Set([...apps.map(a=>a.author), ...prompts.map(p=>p.author)]).size;
 
-            // 2. Charts (Pie for Subject, Bar for Admin)
-            const subC = {}; teachingApps.forEach(a=>subC[a.subject||'其他']=(subC[a.subject||'其他']||0)+1);
-            new Chart(document.getElementById('subjectChart'), {type:'pie', data:{labels:Object.keys(subC), datasets:[{data:Object.values(subC), backgroundColor:['#e74c3c','#e67e22','#f1c40f','#e91e63','#ffcc80','#ffe082']}]}});
+            // 1. Charts
+            const subC={}; tApps.forEach(a=>subC[a.subject||'其他']=(subC[a.subject||'其他']||0)+1);
+            if(window.c1)window.c1.destroy();
+            window.c1 = new Chart(document.getElementById('subjectChart'),{type:'pie',data:{labels:Object.keys(subC),datasets:[{data:Object.values(subC),backgroundColor:Object.keys(subC).map(k=>subCols[k]||'#999')}]}});
 
-            const admC = {}; adminApps.forEach(a=>admC[a.adminType||'其他']=(admC[a.adminType||'其他']||0)+1);
-            new Chart(document.getElementById('adminChart'), {type:'bar', data:{labels:Object.keys(admC), datasets:[{label:'數量', data:Object.values(admC), backgroundColor:'#8e44ad'}]}, options:{plugins:{legend:{display:false}}}});
+            const admC={}; aApps.forEach(a=>admC[a.adminType||'其他']=(admC[a.adminType||'其他']||0)+1);
+            if(window.c2)window.c2.destroy();
+            window.c2 = new Chart(document.getElementById('adminChart'),{type:'bar',data:{labels:Object.keys(admC),datasets:[{label:'數量',data:Object.values(admC),backgroundColor:Object.keys(admC).map(k=>adminCols[k]||'#999')}]},options:{plugins:{legend:{display:false}}}});
 
-            const fiveC = {Creativity:0, 'Critical Thinking':0, Communication:0, Collaboration:0, Citizenship:0, Character:0};
-            apps.forEach(a => { if(a.fiveC) a.fiveC.forEach(c => { if(fiveC[c]!==undefined) fiveC[c]++; }); });
-            new Chart(document.getElementById('fiveCChart'), {type:'radar', data:{labels:Object.keys(fiveC), datasets:[{label:'素養', data:Object.values(fiveC), backgroundColor:'rgba(46,204,113,0.4)', borderColor:'#2ecc71'}]}, options:{scales:{r:{beginAtZero:true}}}});
+            const fC={Creativity:0,'Critical Thinking':0,Communication:0,Collaboration:0,Contribution:0};
+            apps.forEach(a=>{if(a.fiveC)a.fiveC.forEach(c=>{if(fC[c]!==undefined)fC[c]++})});
+            if(window.c3)window.c3.destroy();
+            window.c3 = new Chart(document.getElementById('fiveCChart'),{type:'radar',data:{labels:Object.keys(fC),datasets:[{label:'5C+',data:Object.values(fC),backgroundColor:'rgba(46,204,113,0.4)',borderColor:'#2ecc71'}]},options:{scales:{r:{beginAtZero:true}}}});
 
-            // 3. Leaderboards (Composite Score)
-            const stats = {};
-            Object.values(teacherDirectory).forEach(n => stats[n] = {cnt:0, scoreSum:0, rated:0, final:0});
-            [...apps, ...prompts].forEach(x => {
-                const n = x.author; if(!stats[n]) stats[n]={cnt:0,scoreSum:0,rated:0};
-                stats[n].cnt++;
-                let itemScore = 0;
-                if(x.ratings){
-                   const vs = Object.values(x.ratings);
-                   if(vs.length>0) { itemScore = vs.reduce((a,b)=>a+(b.u+b.e)/2,0)/vs.length; stats[n].scoreSum+=itemScore; stats[n].rated++; }
-                }
-            });
-            
-            let maxCnt = Math.max(...Object.values(stats).map(s=>s.cnt)) || 1;
-            const lbData = Object.keys(stats).map(n => {
-                const s = stats[n];
-                const avg = s.rated>0 ? s.scoreSum/s.rated : 0;
-                const final = (s.cnt/maxCnt*50) + (avg/5*50);
-                return { name:n, cnt:s.cnt, avg:avg.toFixed(1), final:final.toFixed(1) };
-            }).sort((a,b)=>b.final-a.final);
-
-            document.querySelector('#contributorTable tbody').innerHTML = lbData.map((d,i)=>`<tr><td><span class="rank-badge ${i<3?'rank-'+(i+1):''}">${i+1}</span></td><td>${d.name}</td><td>${d.cnt}</td><td>${d.avg}</td><td><b>${d.final}</b></td></tr>`).join('');
+            // 2. Leaderboards
+            // Active Contributors
+            const auths = {};
+            [...apps,...prompts].forEach(x=>{ auths[x.author]=(auths[x.author]||0)+1; });
+            const lb1 = Object.entries(auths).sort((a,b)=>b[1]-a[1]).slice(0,5);
+            document.querySelector('#contributorTable tbody').innerHTML = lb1.map((x,i)=>`<tr><td><span class="rank-badge ${i<3?'rank-'+(i+1):''}">${i+1}</span></td><td>${x[0]}</td><td>${x[1]}</td></tr>`).join('');
 
             // Top Rated
             const rated = apps.map(a=>{
                 const rs=Object.values(a.ratings||{});
-                const sc = rs.length ? (rs.reduce((s,r)=>s+(r.u+r.e)/2,0)/rs.length).toFixed(1) : 0;
-                return {t:a.title, a:a.author, s:sc};
+                const s = rs.length ? rs.reduce((acc,r)=>acc+(r.u+r.e)/2,0)/rs.length : 0;
+                return {t:a.title, a:a.author, s:s.toFixed(1)};
             }).filter(x=>x.s>0).sort((a,b)=>b.s-a.s).slice(0,5);
-            document.querySelector('#topRatedTable tbody').innerHTML = rated.map((x,i)=>`<tr><td>${i+1}</td><td>${x.t}</td><td>${x.a}</td><td>⭐ ${x.s}</td></tr>`).join('');
+            document.querySelector('#topRatedTable tbody').innerHTML = rated.map((x,i)=>`<tr><td>${i+1}</td><td>${x.t}</td><td>${x.s}</td></tr>`).join('');
         }
 
-        // --- Render Apps (V3.5 Style + Preview) ---
         function renderApps(apps){
-            const c = document.getElementById('appsContainer'); c.innerHTML='';
-            apps.forEach(app => {
-                let imgHTML = '';
-                if(app.resourceType==='image' && app.link && app.link.startsWith('data:image')) imgHTML = `<img src="${app.link}" class="card-img">`;
+            const c=document.getElementById('appsContainer'); c.innerHTML='';
+            apps.forEach(app=>{
+                let img='';
+                if(app.resourceType==='image' && app.link && app.link.startsWith('data:')) img=`<img src="${app.link}" class="card-img">`;
                 else {
-                    const icons = {worksheet:'📄', presentation:'📊', video:'🎬', lessonplan:'📝', url:'🔗'};
-                    imgHTML = `<div class="card-placeholder" style="background:linear-gradient(135deg,#3498db,#2c3e50)"><div class="ph-icon">${icons[app.resourceType]||'🔗'}</div></div>`;
+                    const icons={url:'🔗',video:'🎬',presentation:'📊',worksheet:'📄',lessonplan:'📝'};
+                    img=`<div class="card-placeholder ${app.category==='admin'?'bg-admin':'bg-teaching'}"><div class="ph-icon">${icons[app.resourceType]||'🔗'}</div></div>`;
                 }
-
+                
                 let tags = `<span class="tag">${app.subject||app.adminType}</span>`;
                 if(app.fiveC) app.fiveC.forEach(t=>tags+=`<span class="tag tag-5c">${t}</span>`);
 
-                const rs=Object.values(app.ratings||{});
-                const score = rs.length ? (rs.reduce((s,r)=>s+(r.u+r.e)/2,0)/rs.length).toFixed(1) : 'New';
+                const remarks = app.remarks ? `<div class="remark-alert" style="margin-bottom:5px;padding:5px;">⚠️ ${app.remarks}</div>` : '';
+                const editBtn = (!currentUser.isGuest && (app.author===currentUser.name || app.authorEmail===currentUser.email)) ? `<button class="btn btn-outline btn-xs" style="float:right" onclick='editApp(${JSON.stringify(app)})'>✏️</button>` : '';
 
                 c.innerHTML += `
                 <div class="card" data-cat="${app.category}" data-sub="${app.subject}" onclick="openAppDetail('${app.id}')">
-                    <div class="card-preview-area">${imgHTML}</div>
+                    <div class="card-preview-area">${img}</div>
                     <div class="card-content">
-                        <h3 class="card-title">${app.title}</h3>
+                        <h3 class="card-title">${app.title} ${editBtn}</h3>
                         <div class="card-meta"><span>${app.author}</span><span>${new Date(app.timestamp).toLocaleDateString()}</span></div>
+                        ${remarks}
                         <div class="tag-row">${tags}</div>
                         <div class="card-desc">${app.painPoint||''}</div>
-                        <div class="card-rating-mini">⭐ ${score}</div>
                     </div>
                 </div>`;
             });
         }
 
         function renderPrompts(prompts){
-            const c = document.getElementById('promptsContainer'); c.innerHTML='';
-            prompts.forEach(p => {
-                c.innerHTML += `
-                <div class="prompt-card">
+            const c=document.getElementById('promptsContainer'); c.innerHTML='';
+            prompts.forEach(p=>{
+                 const editBtn = (!currentUser.isGuest && (p.author===currentUser.name || p.authorEmail===currentUser.email)) ? `<button class="btn btn-outline btn-xs" style="float:right" onclick='editPrompt(${JSON.stringify(p)})'>✏️</button>` : '';
+                 c.innerHTML += `
+                 <div class="prompt-card">
                     <div class="prompt-meta"><span>${p.title}</span> <span>${p.author}</span></div>
-                    <div style="font-size:1.1rem; margin-bottom:10px;">🎯 ${p.purpose}</div>
+                    <div style="font-size:1.1rem; margin-bottom:10px;">🎯 ${p.purpose} ${editBtn}</div>
                     <div class="prompt-content-box">${p.content}</div>
-                    <button class="btn btn-outline btn-xs" onclick="navigator.clipboard.writeText(\`${p.content.replace(/`/g,'\\`')}\`);alert('Copied!')">📋 複製指令</button>
-                </div>`;
+                    <button class="btn btn-outline btn-xs" onclick="navigator.clipboard.writeText(\`${p.content.replace(/`/g,'\\`')}\`);alert('Copied!')">📋 Copy Code</button>
+                 </div>`;
             });
         }
 
-        function openAppDetail(id) { /* V3.5 Logic */
-             // ... (Implementation same as previous V4.6 code block, ensures rating/comments work)
-             // Re-implementing briefly for completeness:
-             currentAppId = id; db.collection('apps').doc(id).get().then(doc=>{
-                 const d=doc.data();
-                 document.getElementById('modalAppTitle').innerText=d.title;
-                 document.getElementById('modalAppAuthor').innerText=d.author;
-                 document.getElementById('modalAppDesc').innerText=d.painPoint;
-                 document.getElementById('modalAppLink').href=d.link;
-                 document.getElementById('modalAppTags').innerHTML = (d.fiveC||[]).map(t=>`<span class="tag tag-5c">${t}</span>`).join(' ');
-                 document.getElementById('appDetailModal').style.display='flex';
-                 // Preview
-                 const p = document.getElementById('modalAppPreview');
-                 if(d.resourceType==='image' && d.link.startsWith('data:')) p.innerHTML=`<img src="${d.link}" style="height:100%">`;
-                 else p.innerHTML='<div style="font-size:3rem">🔗</div>';
-                 // Comments
-                 document.getElementById('commentList').innerHTML = (d.comments||[]).map(c=>`<div><b>${c.author}</b>: ${c.content}</div>`).join('');
-             });
+        // --- Detail Modal ---
+        async function openAppDetail(id){
+            // Prevent event bubbling from edit button
+            if(event && event.target.tagName === 'BUTTON') return;
+            
+            currentAppId=id;
+            const app = (await db.collection('apps').doc(id).get()).data();
+            document.getElementById('modalAppTitle').innerText=app.title;
+            document.getElementById('modalAppAuthor').innerText=app.author;
+            document.getElementById('modalAppDate').innerText=new Date(app.timestamp).toLocaleDateString();
+            document.getElementById('modalAppDesc').innerText=app.painPoint;
+            document.getElementById('modalAppLink').href=app.link;
+            
+            // Preview
+            const pBox=document.getElementById('modalAppPreview');
+            if(app.resourceType==='image' && app.link.startsWith('data:')) pBox.innerHTML=`<img src="${app.link}" style="height:100%">`;
+            else pBox.innerHTML=`<div style="font-size:3rem">🔗</div>`;
+
+            // Tags
+            let tags = `<span class="tag">${app.subject||app.adminType}</span>`;
+            if(app.fiveC) app.fiveC.forEach(t=>tags+=`<span class="tag tag-5c">${t}</span>`);
+            document.getElementById('modalAppTags').innerHTML=tags;
+
+            // Comments
+            const cList=document.getElementById('commentList'); cList.innerHTML='';
+            if(app.comments) app.comments.forEach(c=>cList.innerHTML+=`<div style="border-bottom:1px solid #eee;padding:5px"><b>${c.author}</b>: ${c.content}</div>`);
+            
+            // Guest Lock
+            if(currentUser.isGuest){
+                document.getElementById('ratingSection').style.opacity='0.5';
+                document.getElementById('ratingSection').style.pointerEvents='none';
+                document.getElementById('commentInputArea').style.display='none';
+                document.getElementById('guestMsg').style.display='block';
+            } else {
+                document.getElementById('ratingSection').style.opacity='1';
+                document.getElementById('ratingSection').style.pointerEvents='auto';
+                document.getElementById('commentInputArea').style.display='block';
+                document.getElementById('guestMsg').style.display='none';
+            }
+            
+            document.getElementById('appDetailModal').style.display='flex';
         }
         
         function rate(v,t){ currentRating[t]=v; document.getElementById(t==='u'?'usabilityVal':'effectiveVal').innerText=v; }
         function submitRating(){ db.collection('apps').doc(currentAppId).set({ratings:{[currentUser.uid]:currentRating}},{merge:true}).then(()=>alert('Done')); }
         function submitComment(){ const t=document.getElementById('newComment').value; if(t) db.collection('apps').doc(currentAppId).update({comments:firebase.firestore.FieldValue.arrayUnion({author:currentUser.name,content:t,timestamp:Date.now()})}).then(()=>openAppDetail(currentAppId)); }
 
-        // Standard helpers
-        function showPage(id){ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+        // --- Standard Actions ---
+        function showPage(id){ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.getElementById(id).classList.add('active'); if(window.innerWidth<=768) toggleSidebar(); }
+        function toggleSidebar(){ document.querySelector('.sidebar').classList.toggle('active'); document.querySelector('.sidebar-overlay').classList.toggle('active'); }
         function filterApps(t){ document.querySelectorAll('#appsContainer .card').forEach(c=>c.style.display=(t==='all'||c.dataset.cat===t||(t==='value'&&c.dataset.sub==='價值觀教育'))?'flex':'none'); }
+        
+        // Upload Helpers
         function toggleUploadForm(){ const t=document.getElementById('uploadType').value; document.getElementById('appForm').style.display=t==='app'?'block':'none'; document.getElementById('promptForm').style.display=t==='prompt'?'block':'none'; }
         function handleCatChange(){ const adm=document.getElementById('appCategory').value==='admin'; document.getElementById('admGroup').style.display=adm?'block':'none'; document.getElementById('subjGroup').style.display=adm?'none':'block'; document.getElementById('5cGroup').style.display=adm?'none':'block'; }
+        function handleSubjChange(){ document.getElementById('crossSubSection').style.display=document.getElementById('appSubject').value==='跨課程'?'block':'none'; }
         function handleResType(){ const t=document.getElementById('resourceType').value; document.getElementById('fileGroup').style.display=t==='image'?'block':'none'; document.getElementById('urlGroup').style.display=t==='image'?'none':'block'; }
-        document.getElementById('appFile').addEventListener('change',e=>{const r=new FileReader(); r.onload=()=>document.getElementById('appFileBase64').value=r.result; r.readAsDataURL(e.target.files[0]);});
+        document.getElementById('appFile').addEventListener('change', e=>{const r=new FileReader(); r.onload=()=>document.getElementById('appFileBase64').value=r.result; r.readAsDataURL(e.target.files[0]);});
 
         async function submitUpload(){
-            const type=document.getElementById('uploadType').value; const base={author:currentUser.name, uid:currentUser.uid, timestamp:Date.now()};
+            if(currentUser.isGuest) return;
+            const isEdit = document.getElementById('editModeId').value !== "";
+            const type = document.getElementById('uploadType').value;
+            const base = { author: currentUser.name, uid: currentUser.uid, timestamp: Date.now() };
+            
             if(type==='app'){
                 const fiveC=[]; document.querySelectorAll('input[name="5c"]:checked').forEach(c=>fiveC.push(c.value));
-                const d = {...base, title:document.getElementById('appTitle').value, category:document.getElementById('appCategory').value, subject:document.getElementById('appSubject').value, adminType:document.getElementById('appAdminType').value, resourceType:document.getElementById('resourceType').value, link:document.getElementById('appLink').value, painPoint:document.getElementById('appPainPoint').value, fiveC:fiveC, ratings:{}, comments:[]};
-                if(d.resourceType==='image') d.link = document.getElementById('appFileBase64').value;
-                await db.collection('apps').add(d);
+                const cross=[]; document.querySelectorAll('#crossSubChecks input:checked').forEach(c=>cross.push(c.value));
+                const d = {...base, title:document.getElementById('appTitle').value, category:document.getElementById('appCategory').value, subject:document.getElementById('appSubject').value, adminType:document.getElementById('appAdminType').value, resourceType:document.getElementById('resourceType').value, link:document.getElementById('appLink').value, painPoint:document.getElementById('appPainPoint').value, promptText:document.getElementById('appPrompt').value, remarks:document.getElementById('appRemarks').value, fiveC:fiveC, crossSubjects:cross};
+                if(d.resourceType==='image') d.link=document.getElementById('appFileBase64').value;
+                if(!isEdit) { d.ratings={}; d.comments=[]; }
+                
+                const action = isEdit ? db.collection('apps').doc(document.getElementById('editModeId').value).update(d) : db.collection('apps').add(d);
+                action.then(()=>{alert('成功'); loadData(); resetForm();});
             } else {
-                await db.collection('prompts').add({...base, title:document.getElementById('promptTitle').value, content:document.getElementById('promptContent').value, purpose:document.getElementById('promptPurpose').value});
+                const d = {...base, title:document.getElementById('promptTitle').value, content:document.getElementById('promptContent').value, purpose:document.getElementById('promptPurpose').value};
+                const action = isEdit ? db.collection('prompts').doc(document.getElementById('editModeId').value).update(d) : db.collection('prompts').add(d);
+                action.then(()=>{alert('成功'); loadData(); resetForm();});
             }
-            alert('Success'); loadData(); showPage(type==='app'?'apps':'prompts');
         }
-        
-        // Forum
-        async function openNewPostModal(){ document.getElementById('newPostOverlay').style.display='flex'; }
-        async function submitPost(){ await db.collection('posts').add({title:document.getElementById('postTitle').value, content:document.getElementById('postContent').value, author:currentUser.name, timestamp:Date.now(), replies:[]}); document.getElementById('newPostOverlay').style.display='none'; loadData(); }
-        function renderForum(ps){ document.getElementById('forumContainer').innerHTML=ps.map(p=>`<div class="forum-post" onclick="openForumDetail('${p.id}')"><h4>${p.title}</h4><small>${p.author}</small></div>`).join(''); }
 
+        // Edit & Reset
+        function editApp(app){
+            showPage('upload'); document.getElementById('editModeId').value=app.id; document.getElementById('uploadType').value='app'; toggleUploadForm();
+            document.getElementById('appTitle').value=app.title; document.getElementById('appCategory').value=app.category; handleCatChange();
+            document.getElementById('appSubject').value=app.subject||""; handleSubjChange();
+            document.querySelectorAll('#crossSubChecks input').forEach(c=>c.checked=false); (app.crossSubjects||[]).forEach(s=>{try{document.querySelector(`#crossSubChecks input[value="${s}"]`).checked=true}catch(e){}});
+            document.getElementById('appAdminType').value=app.adminType||"";
+            document.getElementById('resourceType').value=app.resourceType||"url"; handleResType();
+            if(app.resourceType==='image') document.getElementById('appFileBase64').value=app.link; else document.getElementById('appLink').value=app.link;
+            document.getElementById('appPainPoint').value=app.painPoint; document.getElementById('appPrompt').value=app.promptText||""; document.getElementById('appRemarks').value=app.remarks||"";
+            document.querySelectorAll('input[name="5c"]').forEach(c=>c.checked=false); (app.fiveC||[]).forEach(v=>{try{document.querySelector(`input[name="5c"][value="${v}"]`).checked=true}catch(e){}});
+            
+            document.getElementById('submitBtn').innerText="確認更新";
+            document.getElementById('cancelBtn').style.display='inline-block';
+            document.getElementById('deleteBtn').style.display='inline-block';
+        }
+
+        function editPrompt(p){
+            showPage('upload'); document.getElementById('editModeId').value=p.id; document.getElementById('uploadType').value='prompt'; toggleUploadForm();
+            document.getElementById('promptTitle').value=p.title; document.getElementById('promptContent').value=p.content; document.getElementById('promptPurpose').value=p.purpose;
+            document.getElementById('submitBtn').innerText="確認更新";
+            document.getElementById('cancelBtn').style.display='inline-block';
+            document.getElementById('deleteBtn').style.display='inline-block';
+        }
+
+        function resetForm(redirect=false){
+            document.getElementById('editModeId').value=""; document.querySelectorAll('input,textarea').forEach(i=>i.value="");
+            document.querySelectorAll('input[type="checkbox"]').forEach(c=>c.checked=false);
+            document.getElementById('submitBtn').innerText="確認發布"; document.getElementById('cancelBtn').style.display='none'; document.getElementById('deleteBtn').style.display='none';
+            if(redirect) showPage('apps');
+        }
+
+        function deleteResource(){
+            const id=document.getElementById('editModeId').value; if(!id)return;
+            if(confirm("確定刪除?")){ const col=document.getElementById('uploadType').value==='app'?'apps':'prompts'; db.collection(col).doc(id).delete().then(()=>{alert('已刪除'); resetForm(true); loadData();}); }
+        }
+
+        function exportDataReport(){
+            const csvContent = "data:text/csv;charset=utf-8,ID,Title,Author\nDemo,Data,Only";
+            const link = document.createElement("a"); link.setAttribute("href", encodeURI(csvContent)); link.setAttribute("download", "report.csv"); document.body.appendChild(link); link.click();
+        }
     </script>
 </body>
 </html>
