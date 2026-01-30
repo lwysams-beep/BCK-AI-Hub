@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Hub | V4.4 登入修復版</title>
+    <title>AI Hub | V4.5 Admin & UI Update</title>
     
     <link rel="icon" href="https://img.icons8.com/fluency/96/artificial-intelligence.png" type="image/png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -17,12 +17,12 @@
         :root {
             --primary: #2c3e50;
             --accent: #00d2ff;
-            --accent-dark: #3a7bd5;
+            --accent-dark: #3a7bd5; /* 藍色系 (用於學科標題) */
             --light: #ecf0f1;
             --success: #00b09b;
             --warning: #f39c12;
             --danger: #e74c3c;
-            --admin-color: #8e44ad;
+            --admin-color: #8e44ad; /* 紫色系 (用於行政標題) */
             --value-edu-color: #e91e63;
             --forum-color: #6c5ce7;
         }
@@ -89,29 +89,47 @@
         .form-group { margin-bottom: 18px; }
         .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #34495e; }
 
-        /* DASHBOARD */
+        /* DASHBOARD - Modified for V4.5 */
+        .announcement-box { background: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 15px; border-radius: 8px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-start; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px; }
         .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; border-bottom: 4px solid var(--accent-dark); }
         .stat-number { font-size: 2.5rem; font-weight: 800; color: var(--primary); margin: 10px 0; }
-        .chart-box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; height: 350px; display:flex; flex-direction:column; }
-        canvas { flex: 1; max-height: 280px; width: 100%; }
+        
+        /* Chart Containers - Vertical Stack */
+        .charts-container { display: flex; flex-direction: column; gap: 30px; }
+        .chart-box { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-height: 400px; display:flex; flex-direction:column; }
+        canvas { flex: 1; max-height: 320px; width: 100%; }
+
+        /* PROMPTS - Modified for V4.5 */
+        .prompt-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: transform 0.2s; border: 1px solid #eee; display: flex; flex-direction: column; }
+        .prompt-card:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.08); }
+        .prompt-content-box { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            font-family: 'Consolas', 'Monaco', monospace; 
+            font-size: 0.95rem; 
+            border-radius: 8px; 
+            margin-bottom: 15px; 
+            border: 1px solid #e9ecef; 
+            color: #2c3e50;
+            white-space: pre-wrap; /* 保留換行 */
+            max-height: 250px; /* 增加高度 */
+            overflow-y: auto;  /* 過長捲動 */
+        }
 
         /* RESOURCE CARDS */
         .resource-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
         .card { background: white; border-radius: 12px; padding: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: transform 0.2s; overflow: hidden; display: flex; flex-direction: column; border: 1px solid #eee; }
         .card:hover { transform: translateY(-5px); box-shadow: 0 12px 20px rgba(0,0,0,0.1); }
-        
         .card-preview-area { width: 100%; height: 160px; position: relative; overflow: hidden; background: #f0f0f0; border-bottom: 1px solid #eee; }
         .card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
         .card:hover .card-img { transform: scale(1.05); }
-        
         .card-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
         .ph-icon { font-size: 3.5rem; margin-bottom: 5px; opacity: 0.9; text-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         .ph-text { font-size: 0.9rem; font-weight: 500; opacity: 0.9; text-shadow: 0 1px 3px rgba(0,0,0,0.2); letter-spacing: 1px; }
         .bg-teaching { background: linear-gradient(135deg, #3a7bd5, #00d2ff); }
         .bg-admin { background: linear-gradient(135deg, #8e44ad, #c39bd3); }
         .bg-value { background: linear-gradient(135deg, #e91e63, #ff8a80); }
-        
         .card-content { padding: 15px; flex: 1; display: flex; flex-direction: column; }
         .card-title { margin: 0 0 5px 0; font-size: 1.15rem; color: #2c3e50; font-weight: 700; line-height: 1.3; }
         .card-meta { font-size: 0.8rem; color: #95a5a6; margin-bottom: 10px; display: flex; justify-content: space-between; }
@@ -138,7 +156,7 @@
 
     <div id="loginModal">
         <div class="login-box">
-            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V4.4</h2>
+            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V4.5</h2>
             <p style="color:#7f8c8d; margin-bottom:20px;">使用校方帳號或訪客密碼登入</p>
             <input type="email" id="loginEmail" class="form-control" placeholder="Email (老師專用)" style="margin-bottom:10px;">
             <input type="password" id="loginPass" class="form-control" placeholder="Password / 訪客密碼" style="margin-bottom:20px;">
@@ -155,7 +173,7 @@
         <div class="sidebar-header">
             <div class="school-name">香海正覺蓮社<br>佛教正覺蓮社學校</div>
             <h2 class="app-name">BCK-AI Hub</h2>
-            <div class="version-tag">V4.4 Stable</div>
+            <div class="version-tag">V4.5 Admin</div>
         </div>
 
         <div id="menu-dashboard" class="menu-item active" onclick="showPage('dashboard')"><span class="menu-icon">📊</span> 數據總覽</div>
@@ -178,14 +196,40 @@
 
         <div id="dashboard" class="page active">
             <h1 style="margin-bottom:20px;">平台數據儀表板</h1>
+            
+            <div id="announcementContainer" style="display:none;">
+                <div class="announcement-box">
+                    <div>
+                        <strong>📢 系統公告：</strong>
+                        <span id="announcementText">載入中...</span>
+                        <div style="font-size:0.8rem; margin-top:5px; color:#856404; opacity:0.8;">
+                            Last updated by lwysams
+                        </div>
+                    </div>
+                    <button id="editAnnouncementBtn" class="btn btn-xs btn-outline" style="background:white; display:none;" onclick="editAnnouncement()">✏️ 編輯</button>
+                </div>
+            </div>
+
             <div class="stats-grid">
                 <div class="stat-card" style="border-bottom-color: var(--accent-dark);"><div class="stat-number" id="totalApps">0</div><div>學教評資源</div></div>
                 <div class="stat-card" style="border-bottom-color: var(--warning);"><div class="stat-number" id="totalPrompts">0</div><div>Prompt 指令</div></div>
                 <div class="stat-card" style="border-bottom-color: var(--success);"><div class="stat-number" id="activeTeachers">0</div><div>參與老師</div></div>
             </div>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                <div class="chart-box"><h3 style="color:var(--accent-dark);margin-top:0">🎓 學科分佈</h3><div style="flex:1;position:relative"><canvas id="subjectChart"></canvas></div></div>
-                <div class="chart-box"><h3 style="color:var(--admin-color);margin-top:0">📂 行政分類</h3><div style="flex:1;position:relative"><canvas id="adminChart"></canvas></div></div>
+            
+            <div class="charts-container">
+                <div class="chart-box">
+                    <h3 style="color:var(--accent-dark); margin-top:0; border-bottom:1px solid #eee; padding-bottom:10px;">🎓 學科分佈 (Teaching)</h3>
+                    <div style="flex:1; position:relative">
+                        <canvas id="subjectChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-box">
+                    <h3 style="color:var(--admin-color); margin-top:0; border-bottom:1px solid #eee; padding-bottom:10px;">📂 行政分類 (Admin)</h3>
+                    <div style="flex:1; position:relative">
+                        <canvas id="adminChart"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -249,7 +293,7 @@
                 </div>
                 <div id="promptForm" style="display:none;">
                     <div class="form-group"><label>主題</label><input type="text" id="promptTitle" class="form-control"></div>
-                    <div class="form-group"><label>內容</label><textarea id="promptContent" class="form-control" rows="6"></textarea></div>
+                    <div class="form-group"><label>內容</label><textarea id="promptContent" class="form-control" rows="8" placeholder="請輸入完整的 Prompt..."></textarea></div>
                     <div class="form-group"><label>用途</label><input type="text" id="promptPurpose" class="form-control"></div>
                 </div>
                 <button id="submitBtn" class="btn btn-primary" style="width:100%; margin-top:20px;" onclick="submitUpload()">確認發布</button>
@@ -303,87 +347,90 @@
         
         let currentUser = null;
         let currentPostId = null;
+        const ADMIN_EMAIL = "lwysams@bcklas.edu.hk"; // 特權帳號
 
         const teacherDirectory = { "lwysams@bcklas.edu.hk": "穎", "slssams@bcklas.edu.hk": "珊", "ckysams@bcklas.edu.hk": "徐", "cymsams@bcklas.edu.hk": "文", "lysams@bcklas.edu.hk": "燕", "hhysams@bcklas.edu.hk": "侯", "scysams@bcklas.edu.hk": "蘇", "ccwsams@bcklas.edu.hk": "瑋", "ynysams@bcklas.edu.hk": "楊", "csysams@bcklas.edu.hk": "淑", "dspsams@bcklas.edu.hk": "丁", "cherry@bcklas.edu.hk": "Cherry", "lslsams@bcklas.edu.hk": "鈴", "cpy2sams@bcklas.edu.hk": "容", "lsysams@bcklas.edu.hk": "呂", "twksams@bcklas.edu.hk": "慧", "wpwsams@bcklas.edu.hk": "榮", "skysams@bcklas.edu.hk": "兒", "cym2sams@bcklas.edu.hk": "綺", "swysams@bcklas.edu.hk": "沈", "whwsams@bcklas.edu.hk": "馨", "ywysams@bcklas.edu.hk": "俞" };
         const guestPass = "26754411!";
 
-        // --- AUTH STATE OBSERVER (FIXED HERE) ---
         auth.onAuthStateChanged((user) => {
             if (user) {
-                // User is logged in
                 let finalName = teacherDirectory[user.email] || user.email.split('@')[0];
                 currentUser = { name: finalName, email: user.email, uid: user.uid, isGuest: false };
-                
-                // CRITICAL FIX: Hide login modal when auth state is confirmed
                 document.getElementById('loginModal').style.display = 'none';
-                
                 initApp();
             } else if (!currentUser || !currentUser.isGuest) {
-                // User is logged out
                 document.getElementById('loginModal').style.display = 'flex';
-                // Reset Login Form UI
                 document.getElementById('loginBtn').disabled = false;
                 document.getElementById('loginBtn').innerText = "登入系統";
                 document.getElementById('loginMsg').innerText = "";
             }
         });
 
-        // --- LOGIN FUNCTION ---
         function handleLogin() {
             const email = document.getElementById('loginEmail').value.trim();
             const pass = document.getElementById('loginPass').value.trim();
             const btn = document.getElementById('loginBtn');
             const msg = document.getElementById('loginMsg');
+            btn.disabled = true; btn.innerText = "登入中..."; msg.innerText = "";
 
-            btn.disabled = true;
-            btn.innerText = "登入中...";
-            msg.innerText = "";
-
-            // Guest Logic
             if (pass === guestPass) { 
-                currentUser = { name: "訪客 (Observer)", isGuest: true }; 
+                currentUser = { name: "訪客 (Observer)", isGuest: true, email: "guest" }; 
                 document.getElementById('loginModal').style.display='none'; 
                 initApp(); 
                 return; 
             }
-
-            // Firebase Logic
-            auth.signInWithEmailAndPassword(email, pass)
-                .catch((error) => {
-                    console.error("Login Error:", error);
-                    btn.disabled = false;
-                    btn.innerText = "登入系統";
-                    
-                    let showText = "❌ 登入失敗";
-                    const errCode = error.code;
-                    const errStr = error.message;
-
-                    if (errCode === 'auth/wrong-password' || errStr.includes('INVALID_LOGIN')) {
-                        showText = "❌ 密碼錯誤，請檢查後重試。";
-                    } else if (errCode === 'auth/user-not-found') {
-                        showText = "❌ 找不到此 Email 帳號。";
-                    } else if (errCode === 'auth/invalid-email') {
-                        showText = "❌ Email 格式不正確。";
-                    } else if (errCode === 'auth/too-many-requests') {
-                        showText = "❌ 嘗試次數過多，請稍後再試。";
-                    } else {
-                        showText = "❌ 帳號或密碼錯誤。";
-                    }
-                    msg.innerText = showText;
-                });
+            auth.signInWithEmailAndPassword(email, pass).catch((error) => {
+                console.error("Login Error:", error);
+                btn.disabled = false; btn.innerText = "登入系統";
+                let showText = "❌ 登入失敗";
+                if (error.code === 'auth/wrong-password') showText = "❌ 密碼錯誤。";
+                else if (error.code === 'auth/user-not-found') showText = "❌ 找不到此帳號。";
+                msg.innerText = showText;
+            });
         }
 
-        function logout() { 
-            auth.signOut().then(() => {
-                currentUser = null;
-                location.reload(); 
-            }); 
-        }
+        function logout() { auth.signOut().then(() => { currentUser = null; location.reload(); }); }
 
         function initApp() {
             document.getElementById('currentUserDisplay').innerText = currentUser.name;
             if(currentUser.isGuest) { document.getElementById('newPostBtn').style.display='none'; document.getElementById('menu-upload').style.display='none'; }
+            
+            // Announcement Permission Check
+            if(currentUser.email === ADMIN_EMAIL) {
+                document.getElementById('editAnnouncementBtn').style.display = 'inline-block';
+            } else {
+                document.getElementById('editAnnouncementBtn').style.display = 'none';
+            }
+            
             loadData();
+            loadAnnouncement();
+        }
+
+        // --- Announcement Functions ---
+        async function loadAnnouncement() {
+            try {
+                const doc = await db.collection('settings').doc('announcement').get();
+                const container = document.getElementById('announcementContainer');
+                if (doc.exists && doc.data().text) {
+                    document.getElementById('announcementText').innerText = doc.data().text;
+                    container.style.display = 'block';
+                } else {
+                    // Default message if empty
+                    document.getElementById('announcementText').innerText = "歡迎使用 BCK-AI Hub!";
+                    container.style.display = 'block';
+                }
+            } catch (e) {
+                console.log("Error loading announcement", e);
+            }
+        }
+
+        async function editAnnouncement() {
+            const oldText = document.getElementById('announcementText').innerText;
+            const newText = prompt("請輸入新的公告內容：", oldText);
+            if(newText !== null && newText !== oldText) {
+                await db.collection('settings').doc('announcement').set({ text: newText, updatedBy: currentUser.email, timestamp: Date.now() });
+                loadAnnouncement();
+            }
         }
 
         async function loadData() {
@@ -398,14 +445,54 @@
             document.getElementById('totalPrompts').innerText = prompts.length;
             document.getElementById('activeTeachers').innerText = new Set([...apps.map(a=>a.author), ...prompts.map(p=>p.author)]).size;
             
+            // Process Data
             const subCounts = {}; apps.filter(a=>a.category==='teaching').forEach(a=>subCounts[a.subject||'其他']=(subCounts[a.subject||'其他']||0)+1);
             const adminCounts = {}; apps.filter(a=>a.category==='admin').forEach(a=>adminCounts[a.adminType||'其他']=(adminCounts[a.adminType||'其他']||0)+1);
             
             if(window.subChart) window.subChart.destroy();
             if(window.admChart) window.admChart.destroy();
             
-            window.subChart = new Chart(document.getElementById('subjectChart'), {type:'bar', data:{labels:Object.keys(subCounts), datasets:[{label:'數量',data:Object.values(subCounts), backgroundColor:'#3498db'}]}, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
-            window.admChart = new Chart(document.getElementById('adminChart'), {type:'doughnut', data:{labels:Object.keys(adminCounts), datasets:[{data:Object.values(adminCounts), backgroundColor:['#8e44ad','#9b59b6','#af7ac5','#c39bd3']}]}, options:{responsive:true,maintainAspectRatio:false}});
+            // --- Chart 1: Subject (Teaching) ---
+            // Requirement: Title Blue (done in HTML), Bars Warm Colors
+            const warmColors = ['#e74c3c', '#e67e22', '#f1c40f', '#e91e63', '#d35400', '#ff8a65', '#ffd54f'];
+            
+            window.subChart = new Chart(document.getElementById('subjectChart'), {
+                type: 'bar', 
+                data: {
+                    labels: Object.keys(subCounts), 
+                    datasets: [{
+                        label: '數量',
+                        data: Object.values(subCounts), 
+                        backgroundColor: warmColors, 
+                        borderWidth: 0
+                    }]
+                }, 
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: {display: false} },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            // --- Chart 2: Admin ---
+            // Requirement: Title Purple (done in HTML), Pie Cold Colors
+            const coolColors = ['#3498db', '#9b59b6', '#1abc9c', '#2980b9', '#8e44ad', '#16a085'];
+            
+            window.admChart = new Chart(document.getElementById('adminChart'), {
+                type: 'doughnut', 
+                data: {
+                    labels: Object.keys(adminCounts), 
+                    datasets: [{
+                        data: Object.values(adminCounts), 
+                        backgroundColor: coolColors
+                    }]
+                }, 
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
         }
 
         function renderApps(apps) {
@@ -427,23 +514,14 @@
 
                 let previewHTML = '';
                 if(app.resourceType === 'image' && app.link) {
-                    previewHTML = `
-                        <img src="${app.link}" class="card-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-                        <div class="card-placeholder ${phBg}" style="display:none">
-                            <div class="ph-icon">${phIcon}</div><div class="ph-text">${phText}</div>
-                        </div>`;
+                    previewHTML = `<img src="${app.link}" class="card-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"><div class="card-placeholder ${phBg}" style="display:none"><div class="ph-icon">${phIcon}</div><div class="ph-text">${phText}</div></div>`;
                 } else {
-                    previewHTML = `
-                        <div class="card-placeholder ${phBg}">
-                            <div class="ph-icon">${phIcon}</div><div class="ph-text">${phText}</div>
-                        </div>`;
+                    previewHTML = `<div class="card-placeholder ${phBg}"><div class="ph-icon">${phIcon}</div><div class="ph-text">${phText}</div></div>`;
                 }
 
                 container.innerHTML += `
                 <div class="card" data-cat="${app.category}" data-sub="${app.subject}">
-                    <div class="card-preview-area">
-                        ${previewHTML}
-                    </div>
+                    <div class="card-preview-area">${previewHTML}</div>
                     <div class="card-content">
                         <h3 class="card-title">${app.title}</h3>
                         <div class="card-meta"><span>${app.author}</span><span>${new Date(app.timestamp).toLocaleDateString()}</span></div>
@@ -455,9 +533,21 @@
             });
         }
 
+        // --- IMPROVED PROMPT RENDER (Full content box) ---
         function renderPrompts(prompts) {
             const c = document.getElementById('promptsContainer'); c.innerHTML='';
-            prompts.forEach(p => c.innerHTML += `<div class="card" style="padding:15px"><h3 style="margin:0 0 10px 0">${p.title}</h3><p style="color:#777;font-size:0.8rem">By ${p.author}</p><div style="background:#f4f4f4;padding:10px;font-family:monospace;font-size:0.9rem;border-radius:5px;margin-bottom:10px">${p.content.substring(0,100)}...</div><button class="btn btn-outline btn-xs" onclick="navigator.clipboard.writeText(\`${p.content}\`);alert('已複製')">複製</button></div>`);
+            prompts.forEach(p => {
+                c.innerHTML += `
+                <div class="prompt-card">
+                    <h3 style="margin:0 0 10px 0; color:var(--primary);">${p.title}</h3>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.8rem; color:#888;">
+                        <span>By ${p.author}</span>
+                        <span>${p.purpose||'一般用途'}</span>
+                    </div>
+                    <div class="prompt-content-box">${p.content}</div>
+                    <button class="btn btn-outline btn-xs" onclick="navigator.clipboard.writeText(\`${p.content.replace(/`/g, '\\`')}\`);alert('已複製')">📋 複製指令</button>
+                </div>`;
+            });
         }
 
         function renderForum(posts) {
