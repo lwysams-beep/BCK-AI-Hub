@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Hub | V5.1 儀表板修復版</title>
+    <title>AI Hub | V5.2 穩定修復版</title>
     
     <link rel="icon" href="https://img.icons8.com/fluency/96/artificial-intelligence.png" type="image/png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -30,7 +30,7 @@
         }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f4f7f6; display: flex; height: 100vh; overflow-x: hidden; }
         
-        /* 漸變側邊欄 */
+        /* 側邊欄 */
         .sidebar { width: 260px; background: linear-gradient(135deg, #141e30 0%, #243b55 100%); color: white; display: flex; flex-direction: column; padding: 20px; box-shadow: 4px 0 15px rgba(0,0,0,0.1); z-index: 1001; flex-shrink: 0; white-space: nowrap; transition: all 0.3s; }
         .main-content { flex: 1; padding: 30px; overflow-y: auto; position: relative; width: 100%; transition: margin 0.3s; }
         
@@ -109,13 +109,16 @@
         .tag { padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; background: #eee; color: #555; }
         .tag-5c { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
         .card-desc { font-size: 0.9rem; color: #555; flex: 1; margin-bottom: 10px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        .bg-teaching { background: linear-gradient(135deg, #3a7bd5, #00d2ff); }
+        .bg-admin { background: linear-gradient(135deg, #8e44ad, #c39bd3); }
+        .bg-value { background: linear-gradient(135deg, #e91e63, #ff8a80); }
 
-        /* Prompts (黑底綠字) */
+        /* Prompts */
         .prompt-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #eee; display:flex; flex-direction:column;}
         .prompt-meta { display: flex; justify-content: space-between; margin-bottom: 10px; color: #888; font-size: 1rem; }
         .prompt-content-box { background: var(--terminal-bg); color: var(--terminal-text); padding: 15px; font-family: 'Courier New', monospace; font-size: 0.95rem; border-radius: 6px; margin-bottom: 15px; border: 1px solid #333; white-space: pre-wrap; max-height: 350px; overflow-y: auto; }
 
-        /* 通用元件 */
+        /* UI 元件 */
         .page { display: none; animation: fadeIn 0.4s; }
         .page.active { display: block; }
         .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
@@ -153,7 +156,7 @@
     <!-- 登入畫面 -->
     <div id="loginModal">
         <div style="background:white; padding:40px; border-radius:15px; width:340px; text-align:center;">
-            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V5.1</h2>
+            <h2 style="color:var(--primary); margin-top:0;">BCK-AI Hub V5.2</h2>
             <p style="color:#7f8c8d; margin-bottom:20px;">校方帳號或訪客登入</p>
             <input type="email" id="loginEmail" class="form-control" placeholder="Email (老師專用)">
             <input type="password" id="loginPass" class="form-control" placeholder="Password / 訪客密碼 (26754411!)">
@@ -168,7 +171,7 @@
         <div class="sidebar-header">
             <div class="school-name">香海正覺蓮社<br>佛教正覺蓮社學校</div>
             <h2 class="app-name">BCK-AI Hub</h2>
-            <div class="version-tag">V5.1 Fixed</div>
+            <div class="version-tag">V5.2 Stable</div>
         </div>
         <div id="menu-dashboard" class="menu-item active" onclick="showPage('dashboard')"><span class="menu-icon">📊</span> 數據總覽</div>
         <div id="menu-apps" class="menu-item" onclick="showPage('apps')"><span class="menu-icon">📱</span> 資源展示庫</div>
@@ -190,6 +193,7 @@
         <div id="dashboard" class="page active">
             <h1 style="margin-bottom:20px;">平台數據儀表板</h1>
             
+            <!-- V5.2 公告欄 (預設隱藏，讀取後顯示) -->
             <div id="announcementContainer" style="display:none;">
                 <div class="announcement-box">
                     <div>
@@ -384,8 +388,16 @@
         }
 
         async function loadAnnouncement(){
-            try { const doc=await db.collection('settings').doc('announcement').get(); if(doc.exists) document.getElementById('announcementText').innerText=doc.data().text; } catch(e){}
+            try { 
+                const doc=await db.collection('settings').doc('announcement').get(); 
+                if(doc.exists) document.getElementById('announcementText').innerText=doc.data().text; 
+                else document.getElementById('announcementText').innerText="歡迎使用 BCK-AI Hub!";
+            } catch(e){
+                document.getElementById('announcementText').innerText="歡迎使用 (無法載入公告)";
+            }
+            document.getElementById('announcementContainer').style.display='block';
         }
+        
         async function editAnnouncement(){
             const t = prompt("輸入公告:", document.getElementById('announcementText').innerText);
             if(t){ await db.collection('settings').doc('announcement').set({text:t}); loadAnnouncement(); }
@@ -436,9 +448,11 @@
         function renderApps(apps){
             const c=document.getElementById('appsContainer'); c.innerHTML='';
             apps.forEach(app=>{
+                // V5.2 Fix: Check for link string AND resourceType match
                 let img='';
-                if(app.resourceType==='image' && app.link && app.link.startsWith('data:')) img=`<img src="${app.link}" class="card-img">`;
-                else {
+                if(app.resourceType==='image' && app.link && typeof app.link === 'string' && app.link.startsWith('data:')) {
+                    img=`<img src="${app.link}" class="card-img">`;
+                } else {
                     const icons={url:'🔗',video:'🎬',presentation:'📊',worksheet:'📄',lessonplan:'📝'};
                     img=`<div class="card-placeholder ${app.category==='admin'?'bg-admin':'bg-teaching'}"><div class="ph-icon">${icons[app.resourceType]||'🔗'}</div></div>`;
                 }
@@ -487,8 +501,9 @@
             document.getElementById('modalAppDesc').innerText=app.painPoint;
             document.getElementById('modalAppLink').href=app.link;
             
+            // V5.2 Fix: Check link type for preview
             const pBox=document.getElementById('modalAppPreview');
-            if(app.resourceType==='image' && app.link.startsWith('data:')) pBox.innerHTML=`<img src="${app.link}" style="height:100%">`;
+            if(app.resourceType==='image' && app.link && typeof app.link === 'string' && app.link.startsWith('data:')) pBox.innerHTML=`<img src="${app.link}" style="height:100%">`;
             else pBox.innerHTML=`<div style="font-size:3rem">🔗</div>`;
 
             let tags = `<span class="tag">${app.subject||app.adminType}</span>`;
