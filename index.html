@@ -643,18 +643,69 @@
             if (type === 'image') { linkGroup.style.display = 'none'; fileGroup.style.display = 'block'; } else { linkGroup.style.display = 'block'; fileGroup.style.display = 'none'; if (type === 'video') linkLabel.innerText = "影片連結 (YouTube/Google Drive)"; else if (type === 'presentation' || type === 'worksheet' || type === 'lessonplan') linkLabel.innerText = "雲端硬碟連結 (Google Drive/OneDrive)"; else linkLabel.innerText = "網頁連結 (URL)"; }
         }
 
-        document.getElementById('appFile').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    document.getElementById('appFileBase64').value = evt.target.result;
-                    document.getElementById('imagePreview').src = evt.target.result;
-                    document.getElementById('imagePreviewBox').style.display = 'block';
-                };
-                reader.readAsDataURL(file);
+// 改良後的程式碼 (V3.7) - 加入圖片壓縮功能
+document.getElementById('appFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // 顯示讀取中...
+    const previewBox = document.getElementById('imagePreviewBox');
+    const previewImg = document.getElementById('imagePreview');
+    previewBox.style.display = 'block';
+    previewImg.src = ''; // 清空
+    
+    // 設定最大寬高與品質
+    const MAX_WIDTH = 800;
+    const MAX_HEIGHT = 800;
+    const QUALITY = 0.7; // 70% 品質，通常足夠且能大幅減少檔案大小
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        const img = new Image();
+        img.src = evt.target.result;
+        
+        img.onload = function() {
+            // 建立 Canvas 進行壓縮
+            let width = img.width;
+            let height = img.height;
+
+            // 計算縮放比例
+            if (width > height) {
+                if (width > MAX_WIDTH) {
+                    height *= MAX_WIDTH / width;
+                    width = MAX_WIDTH;
+                }
+            } else {
+                if (height > MAX_HEIGHT) {
+                    width *= MAX_HEIGHT / height;
+                    height = MAX_HEIGHT;
+                }
             }
-        });
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // 輸出壓縮後的 Base64 (image/jpeg 格式比較省空間)
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', QUALITY);
+
+            // 檢查大小是否仍超過 1MB (約 1000000 bytes 安全值)
+            if (compressedDataUrl.length > 1000000) {
+                alert("⚠️ 圖片壓縮後仍然過大，請選擇較簡單的圖片或截圖。");
+                document.getElementById('appFile').value = ""; // 清空選擇
+                previewBox.style.display = 'none';
+                document.getElementById('appFileBase64').value = "";
+            } else {
+                document.getElementById('appFileBase64').value = compressedDataUrl;
+                previewImg.src = compressedDataUrl;
+            }
+        };
+    };
+    reader.readAsDataURL(file);
+});
+
 
         function renderApps(apps) {
             const container = document.getElementById('appsContainer');
@@ -702,7 +753,11 @@
                         catBadge = `<span class="tag" style="background:${color}; color:white">行政: ${app.adminType}</span>`;
                     }
                     
-                    const isAuthor = (app.author === currentUser.name) || (app.authorEmail && app.authorEmail === currentUser.email);
+                // V3.8 權限升級：作者本人 OR 超級管理員(lwysams)
+                const isAuthor = (app.author === currentUser.name) || 
+                 (app.authorEmail && app.authorEmail === currentUser.email) || 
+                 (currentUser.email === "lwysams@bcklas.edu.hk");
+
                     const editBtn = isAuthor ? `<button class="btn btn-outline" style="font-size:0.7rem; float:right" onclick='editApp(${JSON.stringify(app)})'>✏️ 編輯</button>` : '';
                     
                     let previewHtml = '';
@@ -1091,33 +1146,83 @@
             if(confirm("⚠️ 確定要刪除這個資源嗎？此動作無法還原。")) { const collection = document.getElementById('uploadType').value === 'app' ? 'apps' : 'prompts'; db.collection(collection).doc(docId).delete().then(() => { alert("已刪除"); resetForm(true); loadData(); }); }
         }
         
-        function editApp(app) {
-            showPage('upload'); document.getElementById('editModeId').value = app.id; document.getElementById('uploadType').value = 'app'; toggleUploadForm();
-            document.getElementById('appTitle').value = app.title; document.getElementById('appCategory').value = app.category; 
-            handleCategoryChange();
-            document.getElementById('appSubject').value = app.subject || ""; handleSubjectChange(); 
-            document.querySelectorAll('input[name="crossSub"]').forEach(cb => cb.checked = false);
-            if (app.subject === '跨課程' && app.crossSubjects && Array.isArray(app.crossSubjects)) {
-                document.getElementById('crossSubjectSection').style.display = 'block';
-                app.crossSubjects.forEach(sub => { const cb = document.querySelector(`input[name="crossSub"][value="${sub.trim()}"]`); if(cb) cb.checked = true; });
-            }
-            document.getElementById('appAdminType').value = app.adminType || "";
-            document.getElementById('resourceType').value = app.resourceType || 'url'; handleResourceTypeChange();
-            if(app.resourceType === 'image' && app.link.startsWith('data:')) { document.getElementById('imagePreview').src = app.link; document.getElementById('imagePreviewBox').style.display = 'block'; document.getElementById('appFileBase64').value = app.link; } else { document.getElementById('appLink').value = app.link; }
-            document.getElementById('appPainPoint').value = app.painPoint; document.getElementById('appPrompt').value = app.promptText || ""; 
-            document.getElementById('appRemarks').value = app.remarks || "";
-            document.querySelectorAll('input[name="appTag"]').forEach(cb => cb.checked = false); 
-            if(app.category !== 'admin' && app.tags && Array.isArray(app.tags)) {
-                app.tags.forEach(tag => { const cb = document.querySelector(`input[name="appTag"][value="${tag}"]`); if(cb) cb.checked = true; });
-            }
-            const btn = document.getElementById('submitBtn'); btn.innerText = "確認更新"; btn.classList.replace('btn-primary', 'btn-success'); document.getElementById('cancelBtn').style.display = 'block'; document.getElementById('deleteBtn').style.display = 'block'; 
-        }
-        
-        function editPrompt(p) {
-            showPage('upload'); document.getElementById('editModeId').value = p.id; document.getElementById('uploadType').value = 'prompt'; toggleUploadForm();
-            document.getElementById('promptTitle').value = p.title; document.getElementById('promptContent').value = p.content; document.getElementById('promptPurpose').value = p.purpose;
-            const btn = document.getElementById('submitBtn'); btn.innerText = "確認更新"; btn.classList.replace('btn-primary', 'btn-success'); document.getElementById('cancelBtn').style.display = 'block'; document.getElementById('deleteBtn').style.display = 'block';
-        }
+// V3.8 修正：調整執行順序，先切換表單再填入資料
+function editApp(app) {
+    showPage('upload');
+    // 1. 先設定類型並切換表單 (這樣 resetForm 就不會清掉我們後面要設的 ID)
+    document.getElementById('uploadType').value = 'app';
+    toggleUploadForm(); 
+
+    // 2. 現在才設定 ID 和其他資料
+    document.getElementById('editModeId').value = app.id; 
+    
+    document.getElementById('appTitle').value = app.title; 
+    document.getElementById('appCategory').value = app.category; 
+    handleCategoryChange();
+    
+    document.getElementById('appSubject').value = app.subject || ""; 
+    handleSubjectChange(); 
+    
+    document.querySelectorAll('input[name="crossSub"]').forEach(cb => cb.checked = false);
+    if (app.subject === '跨課程' && app.crossSubjects && Array.isArray(app.crossSubjects)) {
+        document.getElementById('crossSubjectSection').style.display = 'block';
+        app.crossSubjects.forEach(sub => { 
+            const cb = document.querySelector(`input[name="crossSub"][value="${sub.trim()}"]`); 
+            if(cb) cb.checked = true; 
+        });
+    }
+    
+    document.getElementById('appAdminType').value = app.adminType || "";
+    document.getElementById('resourceType').value = app.resourceType || 'url'; 
+    handleResourceTypeChange();
+    
+    if(app.resourceType === 'image' && app.link.startsWith('data:')) { 
+        document.getElementById('imagePreview').src = app.link; 
+        document.getElementById('imagePreviewBox').style.display = 'block'; 
+        document.getElementById('appFileBase64').value = app.link; 
+    } else { 
+        document.getElementById('appLink').value = app.link; 
+    }
+    
+    document.getElementById('appPainPoint').value = app.painPoint; 
+    document.getElementById('appPrompt').value = app.promptText || ""; 
+    document.getElementById('appRemarks').value = app.remarks || "";
+    
+    document.querySelectorAll('input[name="appTag"]').forEach(cb => cb.checked = false); 
+    if(app.category !== 'admin' && app.tags && Array.isArray(app.tags)) {
+        app.tags.forEach(tag => { 
+            const cb = document.querySelector(`input[name="appTag"][value="${tag}"]`); 
+            if(cb) cb.checked = true; 
+        });
+    }
+    
+    const btn = document.getElementById('submitBtn'); 
+    btn.innerText = "確認更新"; 
+    btn.classList.replace('btn-primary', 'btn-success'); 
+    document.getElementById('cancelBtn').style.display = 'block'; 
+    document.getElementById('deleteBtn').style.display = 'block'; 
+}
+
+// V3.8 修正：Prompt 編輯同樣調整順序
+function editPrompt(p) {
+    showPage('upload');
+    // 1. 先切換
+    document.getElementById('uploadType').value = 'prompt'; 
+    toggleUploadForm();
+    
+    // 2. 再填資料
+    document.getElementById('editModeId').value = p.id; 
+    document.getElementById('promptTitle').value = p.title; 
+    document.getElementById('promptContent').value = p.content; 
+    document.getElementById('promptPurpose').value = p.purpose;
+    
+    const btn = document.getElementById('submitBtn'); 
+    btn.innerText = "確認更新"; 
+    btn.classList.replace('btn-primary', 'btn-success'); 
+    document.getElementById('cancelBtn').style.display = 'block'; 
+    document.getElementById('deleteBtn').style.display = 'block';
+}
+
         
         function resetForm(shouldRedirect = false) {
             document.getElementById('editModeId').value = ""; document.querySelectorAll('input[type="text"], input[type="file"], input[type="hidden"], textarea').forEach(i => i.value = ""); 
