@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Hub | 資源展示庫 V3.7</title>
+    <title>AI Hub | 資源展示庫 V3.9</title>
     
     <link rel="icon" href="https://img.icons8.com/fluency/96/artificial-intelligence.png" type="image/png">
 
@@ -855,115 +855,166 @@ document.getElementById('appFile').addEventListener('change', function(e) {
             });
         }
 
-        function renderDashboard(apps, prompts) {
-            const teachingApps = apps.filter(a => a.category === 'teaching');
-            const adminApps = apps.filter(a => a.category === 'admin');
-            
-            document.getElementById('totalApps').innerText = teachingApps.length;
-            document.getElementById('totalAdmin').innerText = adminApps.length;
-            document.getElementById('totalPrompts').innerText = prompts.length;
-            
-            const authors = new Set([...apps.map(a=>a.author), ...prompts.map(p=>p.author)]);
-            document.getElementById('activeTeachers').innerText = authors.size;
+       // V3.9 更新：顯示所有參與者及最後上傳日期
+function renderDashboard(apps, prompts) {
+    const teachingApps = apps.filter(a => a.category === 'teaching');
+    const adminApps = apps.filter(a => a.category === 'admin');
+    
+    document.getElementById('totalApps').innerText = teachingApps.length;
+    document.getElementById('totalAdmin').innerText = adminApps.length;
+    document.getElementById('totalPrompts').innerText = prompts.length;
+    
+    const authors = new Set([...apps.map(a=>a.author), ...prompts.map(p=>p.author)]);
+    document.getElementById('activeTeachers').innerText = authors.size;
 
-            const skillCounts = { "Communication":0, "Contribution":0, "Creativity":0, "Critical Thinking":0, "Collaboration":0 };
-            
-            teachingApps.forEach(a => {
-                let tagsList = [];
-                if (a.tags) {
-                    if (Array.isArray(a.tags)) { tagsList = a.tags; } 
-                    else if (typeof a.tags === 'string') { tagsList = a.tags.split(',').map(t => t.trim()); }
-                }
-                
-                tagsList.forEach(t => {
-                    if(!t) return;
-                    const tagLower = t.toLowerCase();
-                    if(tagLower.includes("creativity")) skillCounts["Creativity"]++;
-                    else if(tagLower.includes("critical")) skillCounts["Critical Thinking"]++;
-                    else if(tagLower.includes("communication")) skillCounts["Communication"]++;
-                    else if(tagLower.includes("collaboration")) skillCounts["Collaboration"]++;
-                    else if(tagLower.includes("contribution")) skillCounts["Contribution"]++;
-                });
-            });
-
-            if(teachingChartRef) teachingChartRef.destroy();
-            teachingChartRef = new Chart(document.getElementById('teachingChart').getContext('2d'), { 
-                type: 'radar', 
-                data: { 
-                    labels: ["創意 Creativity", "明辨 Critical Thinking", "溝通 Communication", "協作 Collaboration", "貢獻 Contribution"], 
-                    datasets: [{ 
-                        label: '5C+ 素養分佈', 
-                        data: [skillCounts["Creativity"], skillCounts["Critical Thinking"], skillCounts["Communication"], skillCounts["Collaboration"], skillCounts["Contribution"]], 
-                        backgroundColor: 'rgba(52, 152, 219, 0.2)', 
-                        borderColor: '#3498db',
-                        pointBackgroundColor: '#3498db'
-                    }] 
-                }, 
-                options: { 
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { r: { beginAtZero: true, suggestedMax: Math.max(5, ...Object.values(skillCounts)), ticks: { stepSize: 1 } } } 
-                } 
-            });
-
-            const subjectCounts = {};
-            teachingApps.forEach(a => { const subj = a.subject || "未分類"; subjectCounts[subj] = (subjectCounts[subj] || 0) + 1; });
-            if(subjectChartRef) subjectChartRef.destroy();
-            subjectChartRef = new Chart(document.getElementById('subjectChart').getContext('2d'), { 
-                type: 'pie', 
-                data: { 
-                    labels: Object.keys(subjectCounts), 
-                    datasets: [{ data: Object.values(subjectCounts), backgroundColor: Object.keys(subjectCounts).map(l => subjectColors[l] || "#95a5a6") }] 
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
-
-            const adminCounts = {};
-            adminApps.forEach(a => { const type = a.adminType || "未分類"; adminCounts[type] = (adminCounts[type] || 0) + 1; });
-            if(adminChartRef) adminChartRef.destroy();
-            adminChartRef = new Chart(document.getElementById('adminChart').getContext('2d'), { type: 'bar', data: { labels: Object.keys(adminCounts), datasets: [{ label: '行政工具分類', data: Object.values(adminCounts), backgroundColor: Object.keys(adminCounts).map(t => adminColors[t] || "#34495e"), borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, plugins: { legend: { display: false } } } });
-
-            const authorStats = {};
-            Object.values(teacherDirectory).forEach(name => { authorStats[name] = { count: 0, sumRating: 0, ratedItems: 0, avgRating: 0, bestItem: null, maxScore: 0 }; });
-            [...apps, ...prompts].forEach(item => {
-                const author = item.author;
-                if(!author) return;
-                if(!authorStats[author]) authorStats[author] = { count: 0, sumRating: 0, ratedItems: 0, avgRating: 0, bestItem: null, maxScore: 0 };
-                const s = authorStats[author]; s.count++;
-                let itemAvg = 0;
-                if (item.ratings) { const rVals = Object.values(item.ratings); if (rVals.length > 0) { const sum = rVals.reduce((acc, r) => acc + (r.ease + r.effect)/2, 0); itemAvg = sum / rVals.length; } }
-                if(itemAvg > 0) { s.sumRating += itemAvg; s.ratedItems++; }
-                if(itemAvg > s.maxScore) { s.maxScore = itemAvg; s.bestItem = item; }
-                if(!s.bestItem) s.bestItem = item;
-            });
-            
-            let maxContributionCount = 0;
-            Object.values(authorStats).forEach(s => { if(s.ratedItems > 0) s.avgRating = s.sumRating / s.ratedItems; if(s.count > maxContributionCount) maxContributionCount = s.count; });
-            if(maxContributionCount === 0) maxContributionCount = 1;
-
-            const leaderboardData = Object.keys(authorStats).map(name => {
-                const s = authorStats[name];
-                const scoreQty = (s.count / maxContributionCount) * 50;
-                const scoreQuality = s.avgRating > 0 ? (s.avgRating / 5) * 50 : 0;
-                return { name: name, count: s.count, avg: s.avgRating.toFixed(1), bestItem: s.bestItem, maxItemScore: s.maxScore, finalScore: (scoreQty + scoreQuality).toFixed(1) };
-            }).filter(d => d.count > 0);
-            leaderboardData.sort((a,b) => b.finalScore - a.finalScore);
-
-            const lb = document.getElementById('leaderboardList'); lb.innerHTML = '';
-            leaderboardData.slice(0, 10).forEach((data, index) => {
-                const rank = index + 1;
-                let rankClass = "rank-rest", rowClass = "", rankIcon = `#${rank}`;
-                if(rank === 1) { rankClass = "rank-1"; rowClass = "top-3 r1"; rankIcon = "🥇"; }
-                else if(rank === 2) { rankClass = "rank-2"; rowClass = "top-3 r2"; rankIcon = "🥈"; }
-                else if(rank === 3) { rankClass = "rank-3"; rowClass = "top-3 r3"; rankIcon = "🥉"; }
-                const bestTitle = (data.bestItem && data.bestItem.title) ? (data.bestItem.title.length > 8 ? data.bestItem.title.substring(0,8)+"..." : data.bestItem.title) : "尚無";
-                const linkAction = (data.bestItem && data.bestItem.id) ? `onclick="focusOnItem('${data.bestItem.id}', '${data.bestItem.link ? 'app' : 'prompt'}')"` : `style="pointer-events:none; color:#ccc"`;
-                lb.innerHTML += `<div class="lb-card ${rowClass}"><div class="lb-rank ${rankClass}">${rankIcon}</div><div class="lb-info"><div class="lb-name">${data.name}</div><div class="lb-metrics"><span>📦 貢獻: ${data.count}</span><span>⭐ 平均: ${data.avg}</span><span>🏆 代表作: <a href="#" ${linkAction} style="text-decoration:none; color:inherit;">${bestTitle}</a></span></div></div><div class="lb-score-box"><div class="lb-score-val">${data.finalScore}</div><div class="lb-score-label">戰力指數</div></div></div>`;
-            });
+    const skillCounts = { "Communication":0, "Contribution":0, "Creativity":0, "Critical Thinking":0, "Collaboration":0 };
+    
+    teachingApps.forEach(a => {
+        let tagsList = [];
+        if (a.tags) {
+            if (Array.isArray(a.tags)) { tagsList = a.tags; } 
+            else if (typeof a.tags === 'string') { tagsList = a.tags.split(',').map(t => t.trim()); }
         }
+        
+        tagsList.forEach(t => {
+            if(!t) return;
+            const tagLower = t.toLowerCase();
+            if(tagLower.includes("creativity")) skillCounts["Creativity"]++;
+            else if(tagLower.includes("critical")) skillCounts["Critical Thinking"]++;
+            else if(tagLower.includes("communication")) skillCounts["Communication"]++;
+            else if(tagLower.includes("collaboration")) skillCounts["Collaboration"]++;
+            else if(tagLower.includes("contribution")) skillCounts["Contribution"]++;
+        });
+    });
+
+    if(teachingChartRef) teachingChartRef.destroy();
+    teachingChartRef = new Chart(document.getElementById('teachingChart').getContext('2d'), { 
+        type: 'radar', 
+        data: { 
+            labels: ["創意 Creativity", "明辨 Critical Thinking", "溝通 Communication", "協作 Collaboration", "貢獻 Contribution"], 
+            datasets: [{ 
+                label: '5C+ 素養分佈', 
+                data: [skillCounts["Creativity"], skillCounts["Critical Thinking"], skillCounts["Communication"], skillCounts["Collaboration"], skillCounts["Contribution"]], 
+                backgroundColor: 'rgba(52, 152, 219, 0.2)', 
+                borderColor: '#3498db',
+                pointBackgroundColor: '#3498db'
+            }] 
+        }, 
+        options: { scales: { r: { beginAtZero: true, suggestedMax: Math.max(5, ...Object.values(skillCounts)), ticks: { stepSize: 1 } } } } 
+    });
+
+    const subjectCounts = {};
+    teachingApps.forEach(a => { const subj = a.subject || "未分類"; subjectCounts[subj] = (subjectCounts[subj] || 0) + 1; });
+    if(subjectChartRef) subjectChartRef.destroy();
+    subjectChartRef = new Chart(document.getElementById('subjectChart').getContext('2d'), { type: 'pie', data: { labels: Object.keys(subjectCounts), datasets: [{ data: Object.values(subjectCounts), backgroundColor: Object.keys(subjectCounts).map(l => subjectColors[l] || "#95a5a6") }] } });
+
+    const adminCounts = {};
+    adminApps.forEach(a => { const type = a.adminType || "未分類"; adminCounts[type] = (adminCounts[type] || 0) + 1; });
+    if(adminChartRef) adminChartRef.destroy();
+    adminChartRef = new Chart(document.getElementById('adminChart').getContext('2d'), { type: 'bar', data: { labels: Object.keys(adminCounts), datasets: [{ label: '行政工具分類', data: Object.values(adminCounts), backgroundColor: Object.keys(adminCounts).map(t => adminColors[t] || "#34495e"), borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, plugins: { legend: { display: false } } } });
+
+    // --- 排行榜邏輯開始 (V3.9 修改部分) ---
+    const authorStats = {};
+    // 初始化：加入 lastUploadTime
+    Object.values(teacherDirectory).forEach(name => { 
+        authorStats[name] = { count: 0, sumRating: 0, ratedItems: 0, avgRating: 0, bestItem: null, maxScore: 0, lastUploadTime: 0 }; 
+    });
+    
+    [...apps, ...prompts].forEach(item => {
+        const author = item.author;
+        if(!author) return;
+        
+        // 如果是未在名單中的新老師，也要初始化
+        if(!authorStats[author]) {
+            authorStats[author] = { count: 0, sumRating: 0, ratedItems: 0, avgRating: 0, bestItem: null, maxScore: 0, lastUploadTime: 0 };
+        }
+        
+        const s = authorStats[author]; 
+        s.count++;
+        
+        // 更新最後上傳時間
+        const itemTime = item.timestamp || 0;
+        if (itemTime > s.lastUploadTime) {
+            s.lastUploadTime = itemTime;
+        }
+
+        let itemAvg = 0;
+        if (item.ratings) { 
+            const rVals = Object.values(item.ratings); 
+            if (rVals.length > 0) { 
+                const sum = rVals.reduce((acc, r) => acc + (r.ease + r.effect)/2, 0); 
+                itemAvg = sum / rVals.length; 
+            } 
+        }
+        if(itemAvg > 0) { s.sumRating += itemAvg; s.ratedItems++; }
+        if(itemAvg > s.maxScore) { s.maxScore = itemAvg; s.bestItem = item; }
+        if(!s.bestItem) s.bestItem = item;
+    });
+    
+    let maxContributionCount = 0;
+    Object.values(authorStats).forEach(s => { 
+        if(s.ratedItems > 0) s.avgRating = s.sumRating / s.ratedItems; 
+        if(s.count > maxContributionCount) maxContributionCount = s.count; 
+    });
+    if(maxContributionCount === 0) maxContributionCount = 1;
+
+    const leaderboardData = Object.keys(authorStats).map(name => {
+        const s = authorStats[name];
+        const scoreQty = (s.count / maxContributionCount) * 50;
+        const scoreQuality = s.avgRating > 0 ? (s.avgRating / 5) * 50 : 0;
+        return { 
+            name: name, 
+            count: s.count, 
+            avg: s.avgRating.toFixed(1), 
+            bestItem: s.bestItem, 
+            maxItemScore: s.maxScore, 
+            finalScore: (scoreQty + scoreQuality).toFixed(1),
+            lastUploadTime: s.lastUploadTime // 傳遞時間
+        };
+    }).filter(d => d.count > 0);
+    
+    leaderboardData.sort((a,b) => b.finalScore - a.finalScore);
+
+    const lb = document.getElementById('leaderboardList'); 
+    lb.innerHTML = '';
+    
+    // 移除 .slice(0, 10)，改為顯示全部
+    leaderboardData.forEach((data, index) => {
+        const rank = index + 1;
+        let rankClass = "rank-rest", rowClass = "", rankIcon = `#${rank}`;
+        
+        if(rank === 1) { rankClass = "rank-1"; rowClass = "top-3 r1"; rankIcon = "🥇"; }
+        else if(rank === 2) { rankClass = "rank-2"; rowClass = "top-3 r2"; rankIcon = "🥈"; }
+        else if(rank === 3) { rankClass = "rank-3"; rowClass = "top-3 r3"; rankIcon = "🥉"; }
+        
+        const bestTitle = (data.bestItem && data.bestItem.title) ? (data.bestItem.title.length > 8 ? data.bestItem.title.substring(0,8)+"..." : data.bestItem.title) : "尚無";
+        const linkAction = (data.bestItem && data.bestItem.id) ? `onclick="focusOnItem('${data.bestItem.id}', '${data.bestItem.link ? 'app' : 'prompt'}')"` : `style="pointer-events:none; color:#ccc"`;
+        
+        // 格式化日期
+        let dateDisplay = "---";
+        if (data.lastUploadTime > 0) {
+            const dateObj = new Date(data.lastUploadTime);
+            dateDisplay = dateObj.toLocaleDateString('zh-HK', { month: '2-digit', day: '2-digit' });
+        }
+
+        lb.innerHTML += `
+            <div class="lb-card ${rowClass}">
+                <div class="lb-rank ${rankClass}">${rankIcon}</div>
+                <div class="lb-info">
+                    <div class="lb-name">${data.name}</div>
+                    <div class="lb-metrics">
+                        <span>📦 貢獻: ${data.count}</span>
+                        <span>⭐ 平均: ${data.avg}</span>
+                        <span>🕒 最後: ${dateDisplay}</span>
+                    </div>
+                </div>
+                <div class="lb-score-box">
+                    <div class="lb-score-val">${data.finalScore}</div>
+                    <div class="lb-score-label">戰力指數</div>
+                </div>
+            </div>`;
+    });
+}
 
         function renderPrompts(prompts) {
             const container = document.getElementById('promptsContainer'); container.innerHTML = '';
